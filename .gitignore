@@ -1,2 +1,7 @@
 # IDE's config
 .idea
+.vscode
+
+# Result
+target
+out
