@@ -11,13 +11,16 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import com.fmd.CompiscriptLexer;
 import com.fmd.CompiscriptParser;
-import com.fmd.CompiscriptBaseVisitor;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         // 1. Leer archivo de entrada
         String inputFile = args.length > 0 ? args[0] : "src\\main\\java\\com\\fmd\\program.cps";
         String code = Files.readString(Path.of(inputFile));
+
+        System.out.println("=== CÓDIGO FUENTE ===");
+        System.out.println(code);
+        System.out.println();
 
         // 2. Crear lexer
         CompiscriptLexer lexer = new CompiscriptLexer(CharStreams.fromString(code));
@@ -30,6 +33,7 @@ public class Main {
         ParseTree tree = parser.program();
 
         // 5. Análisis semántico
+        System.out.println("\n=== ANÁLISIS SEMÁNTICO ===\n");
         SemanticVisitor visitor = new SemanticVisitor();
         visitor.visit(tree);
 
@@ -43,7 +47,10 @@ public class Main {
             return;
         }
 
+        System.out.println("✓ No hay errores semánticos");
+
         // 7. Generar TAC
+        System.out.println("\n=== GENERACIÓN DE TAC ===\n");
         TACVisitor visitor_tac = new TACVisitor();
         visitor_tac.visit(tree);
     }
