@@ -1,43 +1,87 @@
 package com.fmd;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fmd.CompiscriptParser;
 import com.fmd.CompiscriptBaseVisitor;
-import com.fmd.modules.TACInstruction;
 
+/**
+ * Visitor Coordinador Principal
+ *
+ * RESPONSABILIDADES:
+ * - Punto de entrada para la generación de TAC
+ * - Crea e inicializa el TACGenerator
+ * - Crea e inicializa TACExprVisitor y TACStmtVisitor
+ * - Coordina el recorrido del programa
+ * - Imprime el TAC generado
+ *
+ * FLUJO:
+ * 1. Main llama a TACVisitor.visit(tree)
+ * 2. TACVisitor crea generator, exprVisitor, stmtVisitor
+ * 3. TACVisitor delega cada statement a stmtVisitor
+ * 4. stmtVisitor usa exprVisitor cuando necesita evaluar expresiones
+ * 5. Ambos visitors usan el mismo generator
+ * 6. Al final, TACVisitor imprime todas las instrucciones
+ */
 public class TACVisitor extends CompiscriptBaseVisitor<Void> {
 
-    private final TACExprVisitor exprVisitor = new TACExprVisitor();
-    private final TACStmtVisitor stmtVisitor = new TACStmtVisitor();
+    private final TACGenerator generator;
+    private final TACExprVisitor exprVisitor;
+    private final TACStmtVisitor stmtVisitor;
 
-    public TACVisitor() {}
+    /**
+     * Constructor: inicializa toda la arquitectura
+     */
+    public TACVisitor() {
+        // 1. Crear el generador (estado compartido)
+        this.generator = new TACGenerator();
 
+        // 2. Crear el visitor de expresiones (usa el generator)
+        this.exprVisitor = new TACExprVisitor(generator);
+
+        // 3. Crear el visitor de statements (usa generator y exprVisitor)
+        this.stmtVisitor = new TACStmtVisitor(generator, exprVisitor);
+    }
+
+    /**
+     * Punto de entrada: procesa todo el programa
+     */
     @Override
     public Void visitProgram(CompiscriptParser.ProgramContext ctx) {
-        System.out.println("Se visito programa");
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("  GENERACIÓN DE TAC - INICIANDO");
+        System.out.println("=".repeat(60));
+
+        // Procesar cada statement del programa
         for (CompiscriptParser.StatementContext stmt : ctx.statement()) {
-            stmtVisitor.visit(stmt); // delega statements
+            stmtVisitor.visit(stmt);
         }
+
+        // Imprimir resultados
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("  TAC GENERADO");
+        System.out.println("=".repeat(60) + "\n");
+
+        generator.printInstructions();
         return null;
     }
 
-    @Override
-    public Void visitBlock(CompiscriptParser.BlockContext ctx) {
-        System.out.println("Se visito block");
-        for (CompiscriptParser.StatementContext stmt : ctx.statement()) {
-            stmtVisitor.visit(stmt); // delega statements
-        }
-        return null;
+    /**
+     * Obtiene el generador (útil para testing)
+     */
+    public TACGenerator getGenerator() {
+        return generator;
     }
 
-    // Ejemplo de delegación a expresiones
-    @Override
-    public Void visitExpressionStatement(CompiscriptParser.ExpressionStatementContext ctx) {
-        System.out.println("Se visito expression statement");
-        String temp = exprVisitor.visit(ctx.expression()); // delega a expresion
-        System.out.println("Resultado temporal de expresión: " + temp);
-        return null;
+    /**
+     * Obtiene el visitor de expresiones (útil para testing)
+     */
+    public TACExprVisitor getExprVisitor() {
+        return exprVisitor;
+    }
+
+    /**
+     * Obtiene el visitor de statements (útil para testing)
+     */
+    public TACStmtVisitor getStmtVisitor() {
+        return stmtVisitor;
     }
 }

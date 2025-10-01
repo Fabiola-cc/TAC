@@ -1,7 +1,7 @@
 package com.fmd.modules;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Representa una instrucción TAC (Three-Address Code)
@@ -10,12 +10,12 @@ public class TACInstruction {
 
     public enum OpType {
         ASSIGN,        // x = y
-        BINARY_OP,     // x = y op z
-        UNARY_OP,      // x = op y
+        BINARY_OP,     // x = y + z
+        UNARY_OP,      // x = -y
         LABEL,         // label:
         GOTO,          // goto label
         IF_GOTO,       // if x relop y goto label
-        CALL,          // call f(params)
+        CALL,          // call f
         RETURN         // return x
     }
 
@@ -23,7 +23,7 @@ public class TACInstruction {
     private String result;      // variable temporal o destino
     private String arg1;        // primer argumento
     private String arg2;        // segundo argumento (para binarios)
-    private String operator;    // operador (+, -, *, /, !) para binarios/unarios
+    private String operator;    // operador (+, -, *, /, %, etc.) 
     private String relop;       // operador relacional (para if)
     private String label;       // etiqueta (para goto/if)
     private List<String> params; // parámetros de llamada
@@ -41,8 +41,8 @@ public class TACInstruction {
     public String getArg1() { return arg1; }
     public void setArg2(String arg2) { this.arg2 = arg2; }
     public String getArg2() { return arg2; }
-    public void setOperator(String operator) { this.operator = operator; }
-    public String getOperator() { return operator; }
+    public void setOperator(String operator) { this.operator = operator; }  
+    public String getOperator() { return operator; }                        
     public void setRelop(String relop) { this.relop = relop; }
     public String getRelop() { return relop; }
     public void setLabel(String label) { this.label = label; }
@@ -56,9 +56,9 @@ public class TACInstruction {
             case ASSIGN:
                 return result + " = " + arg1;
             case BINARY_OP:
-                return result + " = " + arg1 + " " + operator + " " + arg2;
+                return result + " = " + arg1 + " " + operator + " " + arg2;  
             case UNARY_OP:
-                return result + " = " + operator + arg1;
+                return result + " = " + operator + arg1;  
             case LABEL:
                 return label + ":";
             case GOTO:
