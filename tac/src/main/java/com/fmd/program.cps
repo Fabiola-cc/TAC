@@ -1,6 +1,6 @@
 // Class definition and usage
 class Animal {
-  let name: string = 3;
+  let name: string = "Hola";
   let casa: string;
 
   function constructor(name: string) {
