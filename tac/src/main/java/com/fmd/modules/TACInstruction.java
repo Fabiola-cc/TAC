@@ -23,7 +23,7 @@ public class TACInstruction {
     private String result;      // variable temporal o destino
     private String arg1;        // primer argumento
     private String arg2;        // segundo argumento (para binarios)
-    private String operator;    // operador (+, -, *, /, %, etc.) - AGREGADO
+    private String operator;    // operador (+, -, *, /, %, etc.) 
     private String relop;       // operador relacional (para if)
     private String label;       // etiqueta (para goto/if)
     private List<String> params; // parámetros de llamada
@@ -41,8 +41,8 @@ public class TACInstruction {
     public String getArg1() { return arg1; }
     public void setArg2(String arg2) { this.arg2 = arg2; }
     public String getArg2() { return arg2; }
-    public void setOperator(String operator) { this.operator = operator; }  // AGREGADO
-    public String getOperator() { return operator; }                        // AGREGADO
+    public void setOperator(String operator) { this.operator = operator; }  
+    public String getOperator() { return operator; }                        
     public void setRelop(String relop) { this.relop = relop; }
     public String getRelop() { return relop; }
     public void setLabel(String label) { this.label = label; }
@@ -56,9 +56,9 @@ public class TACInstruction {
             case ASSIGN:
                 return result + " = " + arg1;
             case BINARY_OP:
-                return result + " = " + arg1 + " " + operator + " " + arg2;  // CORREGIDO
+                return result + " = " + arg1 + " " + operator + " " + arg2;  
             case UNARY_OP:
-                return result + " = " + operator + arg1;  // CORREGIDO
+                return result + " = " + operator + arg1;  
             case LABEL:
                 return label + ":";
             case GOTO:
