@@ -4,6 +4,9 @@ import com.fmd.CompiscriptParser;
 import com.fmd.CompiscriptBaseVisitor;
 import com.fmd.modules.TACInstruction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
     private final TACGenerator generator;
@@ -12,10 +15,8 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         this.generator = generator;
     }
 
-    // =================================================================
-    // PRIORIDAD 1: EXPRESIONES BÁSICAS
-    // =================================================================
 
+    // EXPRESIONES BÁSICAS
     @Override
     public String visitLiteralExpr(CompiscriptParser.LiteralExprContext ctx) {
         return ctx.getText();
@@ -54,7 +55,6 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
     @Override
     public String visitMultiplicativeExpr(CompiscriptParser.MultiplicativeExprContext ctx) {
-        // CORREGIDO - Implementación completa
         if (ctx.unaryExpr().size() == 1) {
             return visit(ctx.unaryExpr(0));
         }
@@ -81,7 +81,6 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
     @Override
     public String visitUnaryExpr(CompiscriptParser.UnaryExprContext ctx) {
-        // CORREGIDO - Implementación completa
         if (ctx.unaryExpr() == null) {
             return visit(ctx.primaryExpr());
         }
@@ -110,10 +109,8 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         }
     }
 
-    // =================================================================
-    // PRIORIDAD 2: COMPARACIONES Y LÓGICA
-    // =================================================================
 
+    // COMPARACIONES Y LÓGICA
     @Override
     public String visitRelationalExpr(CompiscriptParser.RelationalExprContext ctx) {
         if (ctx.additiveExpr().size() == 1) {
@@ -173,7 +170,18 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
     }
 
     private String handleFunctionCall(CompiscriptParser.CallExprContext ctx, String funcName) {
-        // TODO P3: Implementar
+        TACInstruction callInstruction = new TACInstruction(TACInstruction.OpType.CALL);
+        callInstruction.setArg1(funcName);
+
+        if (ctx.arguments() != null) {
+            List<CompiscriptParser.ExpressionContext> args = ctx.arguments().expression();
+            for (CompiscriptParser.ExpressionContext arg : args) {
+                visit(arg); // evaluar expresion
+                String lastVar = generator.getLastInstruction().getResult(); // tomar la última variable temporal registrada
+                callInstruction.addParam(lastVar); // guardarla como parametro
+            }
+        }
+        generator.addInstruction(callInstruction);
         return null;
     }
 
@@ -195,7 +203,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
     @Override
     public String visitTernaryExpr(CompiscriptParser.TernaryExprContext ctx) {
-        if (ctx.logicalOrExpr() != null && ctx.expression().size() == 0) {
+        if (ctx.logicalOrExpr() != null && ctx.expression().isEmpty()) {
             return visit(ctx.logicalOrExpr());
         }
         // TODO P4: Implementar
@@ -213,10 +221,8 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         return "this";
     }
 
-    // =================================================================
-    // DELEGACIÓN
-    // =================================================================
 
+    // DELEGACIÓN
     public String visitConditionalExpr(CompiscriptParser.ConditionalExprContext ctx) {
         return visitChildren(ctx);
     }

@@ -16,7 +16,8 @@ public class TACInstruction {
         GOTO,          // goto label
         IF_GOTO,       // if x relop y goto label
         CALL,          // call f
-        RETURN         // return x
+        RETURN,         // return x
+        END             // end f
     }
 
     private OpType op;
@@ -69,6 +70,8 @@ public class TACInstruction {
                 return "call " + arg1 + "(" + String.join(", ", params) + ")";
             case RETURN:
                 return "return " + arg1;
+            case END:
+                return "end" + label;
             default:
                 return "UNKNOWN";
         }

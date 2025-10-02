@@ -4,6 +4,8 @@ import com.fmd.CompiscriptParser;
 import com.fmd.CompiscriptBaseVisitor;
 import com.fmd.modules.TACInstruction;
 
+import java.util.List;
+
 /**
  * Visitor para STATEMENTS
  *
@@ -25,15 +27,17 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
     private final TACGenerator generator;
     private final TACExprVisitor exprVisitor;
 
+    private final TACFuncsVisitor funcsVisitor;
+
     public TACStmtVisitor(TACGenerator generator, TACExprVisitor exprVisitor) {
         this.generator = generator;
         this.exprVisitor = exprVisitor;
+
+        this.funcsVisitor = new TACFuncsVisitor(this, generator);
     }
 
-    // =================================================================
-    // PRIORIDAD 1: STATEMENTS BÁSICOS
-    // =================================================================
-
+    
+    // STATEMENTS BÁSICOS
     /**
      * Declaración de variable:
      *      let x: integer = 5;
@@ -92,7 +96,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
             instr.setArg1(value);
             generator.addInstruction(instr);
         } else if (ctx.expression().size() == 2) {
-            // TODO: Asignación a propiedad que debe de ser agregado junto con los métodos asignacion de propiedades y de arrays
+            // TODO: Asignación a propiedad que debe de ser agregado junto con los Metodos asignacion de propiedades y de arrays
             /*
             * obj.prop = expr (asignación a propiedad - Prioridad 5)
             * array[i] = expr (asignación a array - Prioridad 4)
@@ -138,10 +142,8 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         return null;
     }
 
-    // =================================================================
-    // PRIORIDAD 2: CONTROL DE FLUJO
-    // =================================================================
-
+    
+    // CONTROL DE FLUJO
     /**
      * Bloque:
      *      { stmt1; stmt2; }
@@ -278,66 +280,27 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
         return null;
     }
-
-    // =================================================================
-    // PRIORIDAD 3: FUNCIONES
-    // =================================================================
-
-    /**
-     * Declaración de función:
-     *      function suma(a, b) { ... }
-     *
-     * TAC generado:
-     * func_suma:
-     *   [código de la función]
-     *   return null
-     */
+    
+    // FUNCIONES
     @Override
     public Void visitFunctionDeclaration(CompiscriptParser.FunctionDeclarationContext ctx) {
-        // TODO P3: Implementar
-        // 1. Obtener nombre de la función
-        // 2. Marcar inicio de función: generator.enterFunction(name)
-        // 3. Generar etiqueta func_name:
-        // 4. Procesar parámetros (si es necesario)
-        // 5. Procesar cuerpo de la función
-        // 6. Generar return null implícito (si no hay return)
-        // 7. Marcar fin de función: generator.exitFunction()
-
+        funcsVisitor.visit(ctx);
         return null;
     }
 
-    /**
-     * Return statement:
-     *      return x;
-     *
-     * TAC generado:
-     *   t1 = x
-     *   return t1
-     */
     @Override
     public Void visitReturnStatement(CompiscriptParser.ReturnStatementContext ctx) {
-        // TODO P3: Implementar
-        // 1. Si hay expresión, evaluarla
-        // 2. Si no hay expresión, usar "null"
-        // 3. Generar instrucción RETURN
-
-        String value = "null";
-
-        if (ctx.expression() != null) {
-            value = exprVisitor.visit(ctx.expression());
-        }
-
-        TACInstruction instr = new TACInstruction(TACInstruction.OpType.RETURN);
-        instr.setArg1(value);
-        generator.addInstruction(instr);
-
+        funcsVisitor.visit(ctx);
         return null;
     }
 
-    // =================================================================
-    // PRIORIDAD 4: ESTRUCTURAS AVANZADAS
-    // =================================================================
+    @Override
+    public Void visitCallExpr(CompiscriptParser.CallExprContext ctx) {
+        funcsVisitor.visit(ctx);
+        return null;
+    }
 
+    // ESTRUCTURAS AVANZADAS
     /**
      * Declaración de constante:
      *      const PI = 314;
@@ -498,17 +461,15 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         return null;
     }
 
-    // =================================================================
-    // PRIORIDAD 5: POO (Clases y Objetos)
-    // =================================================================
-
+    
+    // POO (Clases y Objetos)
     /**
      * Declaración de clase:
      *      class Perro : Animal { ... }
      *
      * TAC generado:
      * class_Perro:
-     *   [miembros y métodos]
+     *   [miembros y Metodos]
      */
     @Override
     public Void visitClassDeclaration(CompiscriptParser.ClassDeclarationContext ctx) {
@@ -523,12 +484,12 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         return null;
     }
 
-    // =================================================================
+    
     // UTILIDADES
-    // =================================================================
+    
 
     /**
-     * Método genérico para visitar cualquier statement
+     * Metodo genérico para visitar cualquier statement
      */
     @Override
     public Void visitStatement(CompiscriptParser.StatementContext ctx) {
