@@ -250,7 +250,7 @@ public class TACGenerator {
             actualTable.putAll(symTable);
         }
         for (Symbol entry : actualTable.values()) {
-            System.out.println(entry);
+            System.out.println(entry.toStringTAC());
             if (!entry.getMembers().isEmpty()) {
                 System.out.println("\nScope (" + entry.getName() + ": " + entry.getKind()+ ")");
                 imprimirSimbolos(entry.getMembers());

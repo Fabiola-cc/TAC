@@ -14,23 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Tests para P1")
 public class P1Tests {
-
-    private List<String> generateTAC(String code) {
-        // Lexer y parser
-        CompiscriptLexer lexer = new CompiscriptLexer(CharStreams.fromString(code));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        CompiscriptParser parser = new CompiscriptParser(tokens);
-        ParseTree tree = parser.program();
-
-        // Generación TAC
-        TACVisitor visitor_tac = new TACVisitor();
-        visitor_tac.visit(tree);
-
-        // Retornar TAC como lista de strings
-        return visitor_tac.getGenerator().getInstructions().stream()
-                .map(Object::toString)
-                .collect(Collectors.toList());
-    }
+    TestInit testInit = new TestInit();
 
     @Test
     void testLiteralAndArithmetic() {
@@ -40,7 +24,7 @@ public class P1Tests {
                 "t2 = 5 + t1",
                 "a = t2"
         );
-        assertEquals(expected, generateTAC(code));
+        assertEquals(expected, testInit.generateTAC(code));
     }
 
     @Test
@@ -50,7 +34,7 @@ public class P1Tests {
                 "x = 10",
                 "call print(x)"
         );
-        assertEquals(expected, generateTAC(code));
+        assertEquals(expected, testInit.generateTAC(code));
     }
 
 
@@ -61,6 +45,6 @@ public class P1Tests {
                 "t1 = -5",
                 "y = t1"
         );
-        assertEquals(expected, generateTAC(code));
+        assertEquals(expected, testInit.generateTAC(code));
     }
 }

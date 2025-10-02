@@ -14,24 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Tests para P2")
 public class P2Tests {
-
-    private List<String> generateTAC(String code) {
-        // Lexer y parser
-        CompiscriptLexer lexer = new CompiscriptLexer(CharStreams.fromString(code));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        CompiscriptParser parser = new CompiscriptParser(tokens);
-        ParseTree tree = parser.program();
-
-        // Generación TAC
-        TACVisitor visitor_tac = new TACVisitor();
-        visitor_tac.visit(tree);
-
-        // Retornar TAC como lista de strings
-        return visitor_tac.getGenerator().getInstructions().stream()
-                .map(Object::toString)
-                .collect(Collectors.toList());
-    }
-
+    TestInit testInit = new TestInit();
 
     @Test
     void testRelationalAndEquality() {
@@ -46,7 +29,7 @@ public class P2Tests {
                 "t3 = a != b",
                 "call print(t3)"
         );
-        assertEquals(expected, generateTAC(code));
+        assertEquals(expected, testInit.generateTAC(code));
     }
 
     @Test
@@ -60,7 +43,7 @@ public class P2Tests {
                 "t2 = x || y",
                 "call print(t2)"
         );
-        assertEquals(expected, generateTAC(code));
+        assertEquals(expected, testInit.generateTAC(code));
     }
 
 
@@ -77,7 +60,7 @@ public class P2Tests {
                 "call print(t2)",
                 "L2:"
         );
-        assertEquals(expected, generateTAC(code));
+        assertEquals(expected, testInit.generateTAC(code));
     }
 
     @Test
@@ -94,7 +77,7 @@ public class P2Tests {
                 "goto L1",
                 "L2:"
         );
-        assertEquals(expected, generateTAC(code));
+        assertEquals(expected, testInit.generateTAC(code));
     }
 
     @Test
@@ -108,7 +91,7 @@ public class P2Tests {
                 "if t1 != 0 goto L1",
                 "L2:"
         );
-        assertEquals(expected, generateTAC(code));
+        assertEquals(expected, testInit.generateTAC(code));
     }
 
     @Test
@@ -125,6 +108,6 @@ public class P2Tests {
                 "goto L1",
                 "L2:"
         );
-        assertEquals(expected, generateTAC(code));
+        assertEquals(expected, testInit.generateTAC(code));
     }
 }
