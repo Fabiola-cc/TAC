@@ -32,6 +32,9 @@ public class TACGenerator {
     private String currentFunction;        // Nombre de la función actual
     private String currentClass;           // Nombre de la clase actual
 
+    // Tabla de simbolos
+    private String symTable;
+
     public TACGenerator() {
         this.instructions = new ArrayList<>();
         this.tempCounter = 0;
@@ -42,10 +45,7 @@ public class TACGenerator {
         this.currentClass = null;
     }
 
-    // =================================================================
-    // PRIORIDAD 1: MÉTODOS BÁSICOS
-    // =================================================================
-
+    // MÉTODOS BÁSICOS
     /**
      * Genera un nuevo temporal único
      * @return Nombre del temporal (t1, t2, t3, ...)
@@ -81,6 +81,14 @@ public class TACGenerator {
     }
 
     /**
+     * Devuelve la última instrucción generada
+     * @return instrucció TAC
+     */
+    public TACInstruction getLastInstruction() {
+        return instructions.get(instructions.size() - 1);
+    }
+
+    /**
      * Imprime todas las instrucciones de manera legible
      */
     public void printInstructions() {
@@ -94,10 +102,7 @@ public class TACGenerator {
         }
     }
 
-    // =================================================================
     // PRIORIDAD 2: MANEJO DE LOOPS (break/continue)
-    // =================================================================
-
     /**
      * Marca el inicio de un loop (push etiquetas para break/continue)
      * @param breakLabel Etiqueta de salida del loop
@@ -136,10 +141,8 @@ public class TACGenerator {
         return continueLabels.isEmpty() ? null : continueLabels.peek();
     }
 
-    // =================================================================
-    // PRIORIDAD 3: CONTEXTO DE FUNCIONES
-    // =================================================================
 
+    // PRIORIDAD 3: CONTEXTO DE FUNCIONES
     /**
      * Marca el inicio de una función
      * @param functionName Nombre de la función
@@ -163,10 +166,8 @@ public class TACGenerator {
         return currentFunction;
     }
 
-    // =================================================================
-    // PRIORIDAD 5: CONTEXTO DE CLASES (POO)
-    // =================================================================
 
+    // PRIORIDAD 5: CONTEXTO DE CLASES (POO)
     /**
      * Marca el inicio de una clase
      * @param className Nombre de la clase
@@ -190,10 +191,8 @@ public class TACGenerator {
         return currentClass;
     }
 
-    // =================================================================
-    // UTILIDADES
-    // =================================================================
 
+    // UTILIDADES
     /**
      * Limpia todas las instrucciones y resetea contadores
      */

@@ -42,23 +42,17 @@ public class TACVisitor extends CompiscriptBaseVisitor<Void> {
     }
 
     /**
-     * Punto de entrada: procesa todo el programa
+     * Punto de entrada: procesa el programa
      */
     @Override
     public Void visitProgram(CompiscriptParser.ProgramContext ctx) {
-        System.out.println("\n" + "=".repeat(60));
-        System.out.println("  GENERACIÓN DE TAC - INICIANDO");
-        System.out.println("=".repeat(60));
-
         // Procesar cada statement del programa
         for (CompiscriptParser.StatementContext stmt : ctx.statement()) {
             stmtVisitor.visit(stmt);
         }
 
         // Imprimir resultados
-        System.out.println("\n" + "=".repeat(60));
-        System.out.println("  TAC GENERADO");
-        System.out.println("=".repeat(60) + "\n");
+        System.out.println("TAC GENERADO\n");
 
         generator.printInstructions();
         return null;
