@@ -2,9 +2,12 @@ package com.fmd;
 
 import com.fmd.CompiscriptParser;
 import com.fmd.CompiscriptBaseVisitor;
+import com.fmd.modules.Symbol;
 import com.fmd.modules.TACInstruction;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Visitor para STATEMENTS
@@ -39,6 +42,32 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
     
     // STATEMENTS BÁSICOS
     /**
+     * Permite reconocer el offset de cada variable según su tipo
+     * @param type string
+     * @return offset int
+     */
+    private int typeSize(String type) {
+        if (type == null) {
+            return 4; // default (ej: unknown → int)
+        }
+
+        switch (type) {
+            case "boolean":
+                return 1; // 1 byte
+            case "integer":
+                return 4; // 4 bytes
+            case "string":
+                return 8; // referencia a string en heap
+            default:
+                // para arrays, clases, etc.
+                if (type.endsWith("[]")) {
+                    return 8; // referencia a array
+                }
+                return 8; // por defecto: referencia/objeto
+        }
+    }
+
+    /**
      * Declaración de variable:
      *      let x: integer = 5;
      *
@@ -48,17 +77,26 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitVariableDeclaration(CompiscriptParser.VariableDeclarationContext ctx) {
-        // 1. Obtener nombre de la variable
-        // 2. Si tiene inicializador:
-        //    a. Evaluar la expresión (llamar a exprVisitor)
-        //    b. Generar instrucción ASSIGN
-        // 3. Si no tiene inicializador, no generar nada (o asignar null)
-
+        // Obtener nombre de la variable
         String varName = ctx.Identifier().getText();
+        Symbol varSym = generator.getSymbol(varName);
 
+        if (varSym == null) {
+            System.err.println(varName + " is not a variable");
+            return null;
+        }
+
+        // Información para tabla de símbolos
+        varSym.setTacAddress(varName); // en TAC usaremos el mismo nombre
+        varSym.setSize(typeSize(varSym.getType())); // ej: 4 para int, 8 para string
+        varSym.setOffset(generator.allocateLocal(varSym.getSize()));
+
+        // generar instrucciones TAC si tiene inicializador
         if (ctx.initializer() != null) {
+            // Evaluar la expresión (llamar a exprVisitor)
             String value = exprVisitor.visit(ctx.initializer().expression());
 
+            // Generar instrucción ASSIGN
             TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
             instr.setResult(varName);
             instr.setArg1(value);
@@ -159,7 +197,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitBlock(CompiscriptParser.BlockContext ctx) {
-        // TODO P2: Implementar
+        // TODO P2: Implementar manejo de scope
         // 1. Visitar cada statement dentro del bloque
 
         for (CompiscriptParser.StatementContext stmt : ctx.statement()) {
@@ -622,8 +660,6 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
     
     // UTILIDADES
-    
-
     /**
      * Metodo genérico para visitar cualquier statement
      */

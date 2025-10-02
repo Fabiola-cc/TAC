@@ -1,7 +1,9 @@
 package com.fmd;
 
-import com.fmd.CompiscriptParser;
-import com.fmd.CompiscriptBaseVisitor;
+import com.fmd.modules.Symbol;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Visitor Coordinador Principal
@@ -30,9 +32,9 @@ public class TACVisitor extends CompiscriptBaseVisitor<Void> {
     /**
      * Constructor: inicializa toda la arquitectura
      */
-    public TACVisitor() {
+    public TACVisitor(Map<String, Symbol> symTable) {
         // 1. Crear el generador (estado compartido)
-        this.generator = new TACGenerator();
+        this.generator = new TACGenerator(symTable);
 
         // 2. Crear el visitor de expresiones (usa el generator)
         this.exprVisitor = new TACExprVisitor(generator);
@@ -56,6 +58,13 @@ public class TACVisitor extends CompiscriptBaseVisitor<Void> {
 
         generator.printInstructions();
         return null;
+    }
+
+    /**
+     * Metodo para imprimir todos los simbolos
+     */
+    public void printTable(){
+        generator.imprimirSimbolos(new HashMap<>());
     }
 
     /**

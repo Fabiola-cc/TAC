@@ -80,31 +80,7 @@ print(x + y);
 print(-10);
 
 // --------------------------------------------
-// 7. BLOQUES
-// --------------------------------------------
-
-{
-    let local1: integer = 99;
-    let local2: integer = local1 + 1;
-    print(local1);
-    print(local2);
-}
-
-{
-    let a: integer = 1;
-    let b: integer = 2;
-    let c: integer = a + b;
-
-    {
-        let d: integer = c * 2;
-        print(d);
-    }
-
-    print(c);
-}
-
-// --------------------------------------------
-// 8. LITERALES DE DIFERENTES TIPOS
+// 7. LITERALES DE DIFERENTES TIPOS
 // --------------------------------------------
 
 let entero: integer = 42;
@@ -118,7 +94,7 @@ print(verdadero);
 print(falso);
 
 // --------------------------------------------
-// 9. COMBINACIÓN DE TODO
+// 8. COMBINACIÓN
 // --------------------------------------------
 
 let resultado: integer = 0;
@@ -130,3 +106,16 @@ print(resultado);  // (10 + 5) * 2 - 3 = 27
 
 let total: integer = (100 + 50) / 3 * 2 + 10;
 print(total);  // 150 / 3 * 2 + 10 = 50 * 2 + 10 = 110
+
+// --------------------------------------------
+// 9. USO DE FUNCIONES
+// --------------------------------------------
+function speak(name: string): string {
+   let printVar: string = " makes a sound.";
+   return name + printVar;
+}
+
+speak("Firulais");
+
+let name: string = "Alberto";
+print(name + " is here.");

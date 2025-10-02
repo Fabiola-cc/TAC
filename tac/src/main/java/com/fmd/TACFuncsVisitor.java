@@ -27,8 +27,16 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
     @Override
     public Void visitFunctionDeclaration(CompiscriptParser.FunctionDeclarationContext ctx) {
         String funcName = ctx.Identifier().getText();
+        Symbol funcSym = generator.getSymbol(funcName);
 
-        // Marcar inicio de función
+        // Número de parámetros
+        int paramCount = ctx.parameters() != null ? ctx.parameters().parameter().size() : 0;
+        funcSym.setParamCount(paramCount);
+
+        // Reservar espacio para locales (inicialmente 0, se va sumando al declarar variables)
+        funcSym.setLocalVarSize(0);
+
+        // Marcar inicio de función, para acceso a scope
         generator.enterFunction(funcName);
 
         // Generar etiqueta func_name:

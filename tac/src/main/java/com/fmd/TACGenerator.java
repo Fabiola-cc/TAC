@@ -1,9 +1,8 @@
 package com.fmd;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
+import com.fmd.modules.Symbol;
 import com.fmd.modules.TACInstruction;
 
 /**
@@ -33,9 +32,10 @@ public class TACGenerator {
     private String currentClass;           // Nombre de la clase actual
 
     // Tabla de simbolos
-    private String symTable;
+    private final Map<String, Symbol> symTable;
+    private int currentOffset = 0;
 
-    public TACGenerator() {
+    public TACGenerator(Map<String, Symbol> symTable) {
         this.instructions = new ArrayList<>();
         this.tempCounter = 0;
         this.labelCounter = 0;
@@ -43,6 +43,7 @@ public class TACGenerator {
         this.continueLabels = new Stack<>();
         this.currentFunction = null;
         this.currentClass = null;
+        this.symTable = symTable;
     }
 
     // MÉTODOS BÁSICOS
@@ -100,6 +101,14 @@ public class TACGenerator {
         for (int i = 0; i < instructions.size(); i++) {
             System.out.printf("%3d: %s\n", i, instructions.get(i));
         }
+    }
+
+    /**
+     * Mantiene el control del offset en memoria
+     */
+    public int allocateLocal(int size) {
+        currentOffset += size;
+        return currentOffset; // devuelve el offset asignado
     }
 
     // PRIORIDAD 2: MANEJO DE LOOPS (break/continue)
@@ -214,4 +223,38 @@ public class TACGenerator {
         return instructions.size();
     }
 
+    /**
+     * Buscar simbolo en el entorno actual registrado
+     * */
+    public Symbol getSymbol(String name) {
+        Map<String, Symbol> actualTable = new HashMap<>(symTable);
+        if (currentClass != null) {
+            if (symTable.containsKey(currentClass)) {
+                actualTable.putAll(symTable.get(currentFunction).getMembers());
+            }
+        }
+        if (currentFunction != null) {
+            if (symTable.containsKey(currentFunction)) {
+                actualTable.putAll(symTable.get(currentFunction).getMembers());
+            }
+        }
+        if (actualTable.containsKey(name)) {
+            return actualTable.get(name);
+        }
+        return null; // No existe ni afuera ni dentro del scope actual
+    }
+
+    /** imprime recursivamente los símbolos por scope */
+    public void imprimirSimbolos(Map<String, Symbol> actualTable) {
+        if(actualTable.isEmpty()) {
+            actualTable.putAll(symTable);
+        }
+        for (Symbol entry : actualTable.values()) {
+            System.out.println(entry);
+            if (!entry.getMembers().isEmpty()) {
+                System.out.println("\nScope (" + entry.getName() + ": " + entry.getKind()+ ")");
+                imprimirSimbolos(entry.getMembers());
+            }
+        }
+    }
 }

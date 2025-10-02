@@ -51,7 +51,10 @@ public class Main {
 
         // 7. Generar TAC
         System.out.println("\n=== GENERACIÓN DE TAC ===\n");
-        TACVisitor visitor_tac = new TACVisitor();
+        TACVisitor visitor_tac = new TACVisitor(visitor.getAllSymbols());
         visitor_tac.visit(tree);
+
+        System.out.println("\n=== TABLA DE SÍMBOLOS ACTUALIZADA ===\n");
+        visitor_tac.printTable();
     }
 }
