@@ -142,6 +142,13 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitExpression(CompiscriptParser.ExpressionContext ctx) {
+        // Evaluar la expresión
+        exprVisitor.visit(ctx);
+        return null;
+    }
+
     
     // CONTROL DE FLUJO
     /**
@@ -425,12 +432,6 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
     @Override
     public Void visitReturnStatement(CompiscriptParser.ReturnStatementContext ctx) {
-        funcsVisitor.visit(ctx);
-        return null;
-    }
-
-    @Override
-    public Void visitCallExpr(CompiscriptParser.CallExprContext ctx) {
         funcsVisitor.visit(ctx);
         return null;
     }

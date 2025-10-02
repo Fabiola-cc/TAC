@@ -286,9 +286,15 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         if (ctx.arguments() != null) {
             List<CompiscriptParser.ExpressionContext> args = ctx.arguments().expression();
             for (CompiscriptParser.ExpressionContext arg : args) {
-                visit(arg); // evaluar expresion
-                String lastVar = generator.getLastInstruction().getResult(); // tomar la última variable temporal registrada
-                callInstruction.addParam(lastVar); // guardarla como parametro
+                String tempName = generator.newTemp();
+                String literalValue = visit(arg); // evaluar expresion
+
+                TACInstruction paramInstruction = new TACInstruction(TACInstruction.OpType.ASSIGN);
+                paramInstruction.setResult(tempName);
+                paramInstruction.setArg1(literalValue);
+                generator.addInstruction(paramInstruction);
+
+                callInstruction.addParam(tempName); // guardarla como parametro
             }
         }
         generator.addInstruction(callInstruction);

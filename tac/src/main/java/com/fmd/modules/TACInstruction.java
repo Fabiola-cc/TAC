@@ -71,7 +71,7 @@ public class TACInstruction {
             case RETURN:
                 return "return " + arg1;
             case END:
-                return "end" + label;
+                return "end " + label;
             default:
                 return "UNKNOWN";
         }
