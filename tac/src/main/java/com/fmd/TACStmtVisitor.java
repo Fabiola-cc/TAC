@@ -177,21 +177,54 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitIfStatement(CompiscriptParser.IfStatementContext ctx) {
-        // TODO P2: Implementar
         // 1. Evaluar condición
-        // 2. Crear etiquetas (L1 = else/fin, L2 = fin)
-        // 3. Generar salto condicional if condition == false goto L1
+        TACExprVisitor exprVisitor = new TACExprVisitor(generator); // si necesitas el generator
+        String condition = exprVisitor.visit(ctx.expression());
+
+        // 2. Crear etiquetas
+        String elseLabel = generator.newLabel();
+        String endLabel = generator.newLabel();
+
+        // 3. Salto condicional: if condition == false goto elseLabel
+        TACInstruction ifGoto = new TACInstruction(TACInstruction.OpType.IF_GOTO);
+        ifGoto.setArg1(condition);
+        ifGoto.setArg2("0");
+        ifGoto.setRelop("==");
+        ifGoto.setLabel(elseLabel);
+        generator.addInstruction(ifGoto);
+
         // 4. Procesar bloque THEN
-        // 5. Si hay else:
-        //    a. Generar goto L2
-        //    b. Colocar etiqueta L1
-        //    c. Procesar bloque ELSE
-        //    d. Colocar etiqueta L2
-        // 6. Si no hay else:
-        //    a. Colocar etiqueta L1
+        visit(ctx.block(0));
+
+        if (ctx.block().size() > 1) { // hay ELSE
+            // 5a. Generar goto endLabel
+            TACInstruction gotoEnd = new TACInstruction(TACInstruction.OpType.GOTO);
+            gotoEnd.setLabel(endLabel);
+            generator.addInstruction(gotoEnd);
+
+            // 5b. Colocar etiqueta elseLabel
+            TACInstruction elseLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+            elseLblInstr.setLabel(elseLabel);
+            generator.addInstruction(elseLblInstr);
+
+            // 5c. Procesar bloque ELSE
+            visit(ctx.block(1));
+
+            // 5d. Colocar etiqueta endLabel
+            TACInstruction endLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+            endLblInstr.setLabel(endLabel);
+            generator.addInstruction(endLblInstr);
+        } else {
+            // 6a. No hay else: solo colocar etiqueta elseLabel
+            TACInstruction elseLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+            elseLblInstr.setLabel(elseLabel);
+            generator.addInstruction(elseLblInstr);
+        }
 
         return null;
     }
+
+
 
     /**
      * While loop:
@@ -207,19 +240,49 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitWhileStatement(CompiscriptParser.WhileStatementContext ctx) {
-        // TODO P2: Implementar
-        // 1. Crear etiquetas (L1 = inicio, L2 = fin)
-        // 2. Marcar inicio de loop: generator.enterLoop(L2, L1)
-        // 3. Colocar etiqueta L1
+        // 1. Crear etiquetas (inicio y fin)
+        String startLabel = generator.newLabel();
+        String endLabel = generator.newLabel();
+
+        // 2. Marcar inicio de loop para break/continue
+        generator.enterLoop(endLabel, startLabel);
+
+        // 3. Colocar etiqueta inicio (L1)
+        TACInstruction startLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        startLblInstr.setLabel(startLabel);
+        generator.addInstruction(startLblInstr);
+
         // 4. Evaluar condición
-        // 5. Generar salto condicional if condition == false goto L2
-        // 6. Procesar cuerpo
-        // 7. Generar goto L1
-        // 8. Colocar etiqueta L2
-        // 9. Marcar fin de loop: generator.exitLoop()
+        TACExprVisitor exprVisitor = new TACExprVisitor(generator);
+        String condition = exprVisitor.visit(ctx.expression());
+
+        // 5. Salto condicional: if condition == false goto L2
+        TACInstruction ifGoto = new TACInstruction(TACInstruction.OpType.IF_GOTO);
+        ifGoto.setArg1(condition);
+        ifGoto.setArg2("0");
+        ifGoto.setRelop("==");
+        ifGoto.setLabel(endLabel);
+        generator.addInstruction(ifGoto);
+
+        // 6. Procesar cuerpo del while
+        visit(ctx.block());
+
+        // 7. Generar goto inicio (L1)
+        TACInstruction gotoStart = new TACInstruction(TACInstruction.OpType.GOTO);
+        gotoStart.setLabel(startLabel);
+        generator.addInstruction(gotoStart);
+
+        // 8. Colocar etiqueta fin (L2)
+        TACInstruction endLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        endLblInstr.setLabel(endLabel);
+        generator.addInstruction(endLblInstr);
+
+        // 9. Marcar fin de loop
+        generator.exitLoop();
 
         return null;
     }
+
 
     /**
      * Do-While loop:
@@ -234,19 +297,44 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitDoWhileStatement(CompiscriptParser.DoWhileStatementContext ctx) {
-        // TODO P2: Implementar
-        // Similar a while pero evalúa condición al final
-        // 1. Crear etiquetas
-        // 2. Marcar inicio de loop
-        // 3. Colocar etiqueta L1
-        // 4. Procesar cuerpo
+        // 1. Crear etiquetas (inicio y fin)
+        String startLabel = generator.newLabel();
+        String endLabel = generator.newLabel();
+
+        // 2. Marcar inicio de loop para break/continue
+        generator.enterLoop(endLabel, startLabel);
+
+        // 3. Colocar etiqueta inicio (L1)
+        TACInstruction startLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        startLblInstr.setLabel(startLabel);
+        generator.addInstruction(startLblInstr);
+
+        // 4. Procesar cuerpo del do-while
+        visit(ctx.block());
+
         // 5. Evaluar condición
-        // 6. Generar salto if condition == true goto L1
-        // 7. Colocar etiqueta L2
+        TACExprVisitor exprVisitor = new TACExprVisitor(generator);
+        String condition = exprVisitor.visit(ctx.expression());
+
+        // 6. Generar salto: if condition != 0 goto startLabel
+        TACInstruction ifGoto = new TACInstruction(TACInstruction.OpType.IF_GOTO);
+        ifGoto.setArg1(condition);
+        ifGoto.setArg2("0");
+        ifGoto.setRelop("!="); // true = cualquier valor distinto de 0
+        ifGoto.setLabel(startLabel);
+        generator.addInstruction(ifGoto);
+
+        // 7. Colocar etiqueta fin (L2)
+        TACInstruction endLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        endLblInstr.setLabel(endLabel);
+        generator.addInstruction(endLblInstr);
+
         // 8. Marcar fin de loop
+        generator.exitLoop();
 
         return null;
     }
+
 
     /**
      * For loop:
@@ -264,23 +352,70 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitForStatement(CompiscriptParser.ForStatementContext ctx) {
-        // TODO P2: Implementar
-        // 1. Procesar inicialización (si existe)
-        // 2. Crear etiquetas (L1 = inicio, L2 = fin, L3 = update)
-        // 3. Marcar inicio de loop con L2 y L3
-        // 4. Colocar etiqueta L1
-        // 5. Evaluar condición (si existe)
-        // 6. Generar salto condicional
-        // 7. Procesar cuerpo
-        // 8. Colocar etiqueta L3 (para continue)
-        // 9. Procesar update (si existe)
-        // 10. Generar goto L1
-        // 11. Colocar etiqueta L2
-        // 12. Marcar fin de loop
+        // 1. Procesar inicialización (variableDeclaration o assignment)
+        if (ctx.variableDeclaration() != null) {
+            visit(ctx.variableDeclaration());
+        } else if (ctx.assignment() != null) {
+            visit(ctx.assignment());
+        }
+
+        // 2. Crear etiquetas (inicio, fin, update)
+        String startLabel = generator.newLabel();
+        String endLabel = generator.newLabel();
+        String updateLabel = generator.newLabel();
+
+        // 3. Marcar inicio de loop
+        generator.enterLoop(endLabel, updateLabel);
+
+        // 4. Etiqueta de inicio del loop
+        TACInstruction startLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        startLblInstr.setLabel(startLabel);
+        generator.addInstruction(startLblInstr);
+
+        // 5. Evaluar condición si existe
+        if (ctx.expression(0) != null) {
+            TACExprVisitor exprVisitor = new TACExprVisitor(generator);
+            String condition = exprVisitor.visit(ctx.expression(0));
+
+            // 6. Salto condicional: if condition == 0 goto endLabel
+            TACInstruction ifGoto = new TACInstruction(TACInstruction.OpType.IF_GOTO);
+            ifGoto.setArg1(condition);
+            ifGoto.setArg2("0");
+            ifGoto.setRelop("==");
+            ifGoto.setLabel(endLabel);
+            generator.addInstruction(ifGoto);
+        }
+
+        // 7. Procesar cuerpo del loop
+        visit(ctx.block());
+
+        // 8. Etiqueta update (solo si hay update en el for)
+        if (ctx.expression().size() > 1 && ctx.expression(1) != null) {
+            // Generar etiqueta update
+            TACInstruction updateLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+            updateLblInstr.setLabel(updateLabel);
+            generator.addInstruction(updateLblInstr);
+
+            // Procesar expresión de actualización
+            visit(ctx.expression(1));
+        }
+
+        // 9. Goto inicio del loop
+        TACInstruction gotoStart = new TACInstruction(TACInstruction.OpType.GOTO);
+        gotoStart.setLabel(startLabel);
+        generator.addInstruction(gotoStart);
+
+        // 10. Etiqueta de fin del loop
+        TACInstruction endLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        endLblInstr.setLabel(endLabel);
+        generator.addInstruction(endLblInstr);
+
+        // 11. Marcar fin de loop
+        generator.exitLoop();
 
         return null;
     }
-    
+
     // FUNCIONES
     @Override
     public Void visitFunctionDeclaration(CompiscriptParser.FunctionDeclarationContext ctx) {

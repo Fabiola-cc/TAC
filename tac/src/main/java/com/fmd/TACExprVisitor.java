@@ -116,8 +116,29 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         if (ctx.additiveExpr().size() == 1) {
             return visit(ctx.additiveExpr(0));
         }
-        // TODO P2: Implementar
-        return null;
+
+        // Evaluar el primer operando
+        String left = visit(ctx.additiveExpr(0));
+
+        // Procesar cada operación relacional de izquierda a derecha
+        for (int i = 1; i < ctx.additiveExpr().size(); i++) {
+            String right = visit(ctx.additiveExpr(i));
+            String temp = generator.newTemp();
+
+            // Obtener el operador: '<', '>', '<=', '>='
+            String op = ctx.getChild(2 * i - 1).getText();
+
+            TACInstruction instr = new TACInstruction(TACInstruction.OpType.BINARY_OP);
+            instr.setResult(temp);
+            instr.setArg1(left);
+            instr.setArg2(right);
+            instr.setOperator(op);
+            generator.addInstruction(instr);
+
+            left = temp;
+        }
+
+        return left;
     }
 
     @Override
@@ -125,8 +146,29 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         if (ctx.relationalExpr().size() == 1) {
             return visit(ctx.relationalExpr(0));
         }
-        // TODO P2: Implementar
-        return null;
+
+        // Evaluar el primer operando
+        String left = visit(ctx.relationalExpr(0));
+
+        // Procesar cada operación de igualdad de izquierda a derecha
+        for (int i = 1; i < ctx.relationalExpr().size(); i++) {
+            String right = visit(ctx.relationalExpr(i));
+            String temp = generator.newTemp();
+
+            // Obtener el operador: '==' o '!='
+            String op = ctx.getChild(2 * i - 1).getText();
+
+            TACInstruction instr = new TACInstruction(TACInstruction.OpType.BINARY_OP);
+            instr.setResult(temp);
+            instr.setArg1(left);
+            instr.setArg2(right);
+            instr.setOperator(op);
+            generator.addInstruction(instr);
+
+            left = temp;
+        }
+
+        return left;
     }
 
     @Override
@@ -134,18 +176,86 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         if (ctx.equalityExpr().size() == 1) {
             return visit(ctx.equalityExpr(0));
         }
-        // TODO P2: Implementar
-        return null;
+
+        String result = generator.newTemp();
+        String endLabel = generator.newLabel();
+
+        String left = visit(ctx.equalityExpr(0));
+
+        // Inicializamos resultado = 0 (false)
+        TACInstruction init = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        init.setResult(result);
+        init.setArg1("0");
+        generator.addInstruction(init);
+
+        // Si left == 0, saltar al endLabel
+        TACInstruction ifGoto = new TACInstruction(TACInstruction.OpType.IF_GOTO);
+        ifGoto.setArg1(left);
+        ifGoto.setArg2("0");
+        ifGoto.setRelop("==");
+        ifGoto.setLabel(endLabel);
+        generator.addInstruction(ifGoto);
+
+        // Evaluamos right
+        String right = visit(ctx.equalityExpr(1));
+
+        // Asignamos right a result
+        TACInstruction assignRight = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        assignRight.setResult(result);
+        assignRight.setArg1(right);
+        generator.addInstruction(assignRight);
+
+        TACInstruction lblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        lblInstr.setLabel(endLabel);
+        generator.addInstruction(lblInstr);
+
+        return result;
     }
+
+
 
     @Override
     public String visitLogicalOrExpr(CompiscriptParser.LogicalOrExprContext ctx) {
         if (ctx.logicalAndExpr().size() == 1) {
             return visit(ctx.logicalAndExpr(0));
         }
-        // TODO P2: Implementar
-        return null;
+
+        String result = generator.newTemp();
+        String endLabel = generator.newLabel();
+
+        String left = visit(ctx.logicalAndExpr(0));
+
+        // Inicializamos resultado = 1 (true)
+        TACInstruction init = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        init.setResult(result);
+        init.setArg1("1");
+        generator.addInstruction(init);
+
+        // Si left != 0, saltar al endLabel
+        TACInstruction ifGoto = new TACInstruction(TACInstruction.OpType.IF_GOTO);
+        ifGoto.setArg1(left);
+        ifGoto.setArg2("0");
+        ifGoto.setRelop("!=");
+        ifGoto.setLabel(endLabel);
+        generator.addInstruction(ifGoto);
+
+        // Evaluamos right
+        String right = visit(ctx.logicalAndExpr(1));
+
+        // Asignamos right a result
+        TACInstruction assignRight = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        assignRight.setResult(result);
+        assignRight.setArg1(right);
+        generator.addInstruction(assignRight);
+
+        TACInstruction lblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        lblInstr.setLabel(endLabel);
+        generator.addInstruction(lblInstr);
+
+        return result;
     }
+
+
 
     @Override
     public String visitLeftHandSide(CompiscriptParser.LeftHandSideContext ctx) {
