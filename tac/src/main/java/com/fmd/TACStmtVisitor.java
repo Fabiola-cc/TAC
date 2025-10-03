@@ -509,21 +509,95 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitForeachStatement(CompiscriptParser.ForeachStatementContext ctx) {
-        // TODO P4: Implementar
-        // 1. Obtener variable iteradora y colección
-        // 2. Crear temporales para índice y longitud
-        // 3. Inicializar índice = 0
-        // 4. Obtener longitud de la colección
-        // 5. Crear etiquetas
-        // 6. Marcar inicio de loop
-        // 7. Crear loop mientras índice < longitud
-        // 8. Dentro del loop:
-        //    a. Obtener elemento actual
-        //    b. Asignar a variable iteradora
-        //    c. Procesar cuerpo
-        //    d. Incrementar índice
-        // 9. Marcar fin de loop
+        // Crear temporales para índice
+        String temp_index = generator.newTemp();
+        String temp_len = generator.newTemp();
+        String itemName = ctx.Identifier().getText();
 
+        // Inicializar índice = 0
+        TACInstruction indexInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        indexInstr.setResult(temp_index);
+        indexInstr.setArg1("0");
+        generator.addInstruction(indexInstr);
+
+        // Obtener longitud de la colección
+        String listName = exprVisitor.visit(ctx.expression());
+        Symbol list = generator.getSymbol(listName);
+        int listLen = (list.getDimensions() != null) ? list.getDimensions().get(0) : 0;
+
+        TACInstruction lenInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        lenInstr.setResult(temp_len);
+        lenInstr.setArg1(String.valueOf(listLen));
+        generator.addInstruction(lenInstr);
+
+
+        // Crear etiquetas
+        String loopLabel = generator.newLabel();
+        String loopEndLabel = generator.newLabel();
+
+        // Marcar inicio de loop
+        generator.enterLoop(temp_len, loopLabel);
+        TACInstruction loopInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        loopInstr.setLabel(loopLabel);
+        generator.addInstruction(loopInstr);
+
+        // Crear loop mientras índice < longitud
+        TACInstruction condInstr = new TACInstruction(TACInstruction.OpType.BINARY_OP);
+        String cond_temp = generator.newTemp();
+        condInstr.setResult(cond_temp);
+        condInstr.setArg1(temp_index);
+        condInstr.setOperator("<");
+        condInstr.setArg2(temp_len);
+        generator.addInstruction(condInstr);
+
+        TACInstruction moveInstr = new TACInstruction(TACInstruction.OpType.IF_GOTO);
+        moveInstr.setArg1(cond_temp);
+        moveInstr.setRelop("==");
+        moveInstr.setArg2("0"); // FALSE
+        moveInstr.setLabel(loopEndLabel);
+        generator.addInstruction(moveInstr);
+
+        //  Obtener elemento actual
+        String nameList = ctx.expression().getText(); // TODO
+        String access_temp = generator.newTemp();
+
+        TACInstruction accessInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        accessInstr.setResult(access_temp);
+        accessInstr.setArg1(nameList + "[" + temp_index + "]");
+        generator.addInstruction(accessInstr);
+
+        //  Asignar a variable iteradora
+        TACInstruction iterInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        iterInstr.setResult(itemName);
+        iterInstr.setArg1(access_temp);
+        generator.addInstruction(iterInstr);
+
+        //  Procesar cuerpo
+        visit(ctx.block()); // Revisar uso de item_name
+
+        // Incrementar índice
+        String temp = generator.newTemp();
+        TACInstruction tempCounterInstr = new TACInstruction(TACInstruction.OpType.BINARY_OP);
+        tempCounterInstr.setResult(temp);
+        tempCounterInstr.setArg1(temp_index);
+        tempCounterInstr.setOperator("+");
+        tempCounterInstr.setArg2("1");
+        generator.addInstruction(tempCounterInstr);
+
+        TACInstruction counterInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        counterInstr.setResult(temp_index);
+        counterInstr.setArg1(temp);
+        generator.addInstruction(counterInstr);
+
+        TACInstruction restartInstr = new TACInstruction(TACInstruction.OpType.GOTO);
+        restartInstr.setLabel(loopLabel);
+        generator.addInstruction(restartInstr);
+
+        // Marcar fin de loop
+        TACInstruction loopEndInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        loopEndInstr.setLabel(loopEndLabel);
+        generator.addInstruction(loopEndInstr);
+        generator.exitLoop();
         return null;
     }
 
