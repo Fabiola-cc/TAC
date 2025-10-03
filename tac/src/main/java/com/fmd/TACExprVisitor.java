@@ -302,9 +302,20 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
     }
 
     private String handleArrayAccess(CompiscriptParser.IndexExprContext ctx, String arrayName) {
-        // TODO P4: Implementar
-        return null;
+        String indexVal = visit(ctx.expression());
+        String temp = generator.newTemp();
+
+        TACInstruction instr = new TACInstruction(TACInstruction.OpType.BINARY_OP);
+        instr.setResult(temp);
+        instr.setArg1(arrayName);
+        instr.setArg2(indexVal);
+        instr.setOperator("[]"); // operador ficticio para acceso
+        generator.addInstruction(instr);
+
+        return temp;
     }
+
+
 
     private String handlePropertyAccess(CompiscriptParser.PropertyAccessExprContext ctx, String objName) {
         // TODO P5: Implementar
@@ -313,9 +324,30 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
     @Override
     public String visitArrayLiteral(CompiscriptParser.ArrayLiteralContext ctx) {
-        // TODO P4: Implementar
-        return null;
+        String temp = generator.newTemp();
+
+        // Crear arreglo vacío
+        TACInstruction init = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        init.setResult(temp);
+        init.setArg1("[]"); // literal vacío
+        generator.addInstruction(init);
+
+        // Agregar cada elemento
+        for (CompiscriptParser.ExpressionContext exprCtx : ctx.expression()) {
+            String val = visit(exprCtx);
+
+            TACInstruction addInstr = new TACInstruction(TACInstruction.OpType.BINARY_OP);
+            addInstr.setResult(temp);   // mismo arreglo
+            addInstr.setArg1(temp);     // arreglo previo
+            addInstr.setArg2(val);      // nuevo elemento
+            addInstr.setOperator("[]+"); // operador ficticio de push
+            generator.addInstruction(addInstr);
+        }
+
+        return temp;
     }
+
+
 
     @Override
     public String visitTernaryExpr(CompiscriptParser.TernaryExprContext ctx) {
