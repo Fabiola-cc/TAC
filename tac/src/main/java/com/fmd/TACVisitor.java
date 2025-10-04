@@ -32,9 +32,9 @@ public class TACVisitor extends CompiscriptBaseVisitor<Void> {
     /**
      * Constructor: inicializa toda la arquitectura
      */
-    public TACVisitor(Map<String, Symbol> symTable) {
+    public TACVisitor(Map<String, SemanticVisitor.Entorno> scopeTable) {
         // 1. Crear el generador (estado compartido)
-        this.generator = new TACGenerator(symTable);
+        this.generator = new TACGenerator(scopeTable);
 
         // 2. Crear el visitor de expresiones (usa el generator)
         this.exprVisitor = new TACExprVisitor(generator);

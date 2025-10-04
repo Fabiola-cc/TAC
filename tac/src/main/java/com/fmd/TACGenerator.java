@@ -32,10 +32,11 @@ public class TACGenerator {
     private String currentClass;           // Nombre de la clase actual
 
     // Tabla de simbolos
-    private final Map<String, Symbol> symTable;
+    private final Map<String, SemanticVisitor.Entorno> scopeTable;
+    private String currentScopeLine;        // Id del scope actual
     private int currentOffset = 0;
 
-    public TACGenerator(Map<String, Symbol> symTable) {
+    public TACGenerator(Map<String, SemanticVisitor.Entorno> scopeTable) {
         this.instructions = new ArrayList<>();
         this.tempCounter = 0;
         this.labelCounter = 0;
@@ -43,7 +44,8 @@ public class TACGenerator {
         this.continueLabels = new Stack<>();
         this.currentFunction = null;
         this.currentClass = null;
-        this.symTable = symTable;
+        this.currentScopeLine = "0";
+        this.scopeTable = scopeTable;
     }
 
     // MÉTODOS BÁSICOS
@@ -227,17 +229,8 @@ public class TACGenerator {
      * Buscar simbolo en el entorno actual registrado
      * */
     public Symbol getSymbol(String name) {
-        Map<String, Symbol> actualTable = new HashMap<>(symTable);
-        if (currentClass != null) {
-            if (symTable.containsKey(currentClass)) {
-                actualTable.putAll(symTable.get(currentFunction).getMembers());
-            }
-        }
-        if (currentFunction != null) {
-            if (symTable.containsKey(currentFunction)) {
-                actualTable.putAll(symTable.get(currentFunction).getMembers());
-            }
-        }
+        SemanticVisitor.Entorno thisScope = scopeTable.get(currentScopeLine);
+        Map<String, Symbol> actualTable = thisScope.getAllSymbols();
         if (actualTable.containsKey(name)) {
             return actualTable.get(name);
         }
@@ -247,7 +240,7 @@ public class TACGenerator {
     /** imprime recursivamente los símbolos por scope */
     public void imprimirSimbolos(Map<String, Symbol> actualTable) {
         if(actualTable.isEmpty()) {
-            actualTable.putAll(symTable);
+            actualTable.putAll(scopeTable.get("0").getAllSymbols());
         }
         for (Symbol entry : actualTable.values()) {
             System.out.println(entry.toStringTAC());
@@ -256,5 +249,9 @@ public class TACGenerator {
                 imprimirSimbolos(entry.getMembers());
             }
         }
+    }
+
+    public void setCurrentScopeLine(String currentScopeLine) {
+        this.currentScopeLine = currentScopeLine;
     }
 }

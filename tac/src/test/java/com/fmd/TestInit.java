@@ -20,7 +20,7 @@ public class TestInit {
         visitor.visit(tree);
 
         // Generación TAC
-        TACVisitor visitor_tac = new TACVisitor(visitor.getAllSymbols());
+        TACVisitor visitor_tac = new TACVisitor(visitor.getExistingScopes());
         visitor_tac.visit(tree);
 
         // Retornar TAC como lista de strings

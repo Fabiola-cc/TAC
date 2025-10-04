@@ -199,8 +199,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitBlock(CompiscriptParser.BlockContext ctx) {
-        // TODO P2: Implementar manejo de scope
-        // 1. Visitar cada statement dentro del bloque
+        generator.setCurrentScopeLine(String.valueOf(ctx.start.getLine()));
 
         for (CompiscriptParser.StatementContext stmt : ctx.statement()) {
             visit(stmt);
@@ -224,6 +223,8 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitIfStatement(CompiscriptParser.IfStatementContext ctx) {
+        generator.setCurrentScopeLine(String.valueOf(ctx.block(0).start.getLine()));
+
         // 1. Evaluar condición
         TACExprVisitor exprVisitor = new TACExprVisitor(generator); // si necesitas el generator
         String condition = exprVisitor.visit(ctx.expression());
@@ -399,6 +400,8 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitForStatement(CompiscriptParser.ForStatementContext ctx) {
+        generator.setCurrentScopeLine(String.valueOf(ctx.block().start.getLine()));
+
         // 1. Procesar inicialización (variableDeclaration o assignment)
         if (ctx.variableDeclaration() != null) {
             visit(ctx.variableDeclaration());
@@ -505,6 +508,8 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitForeachStatement(CompiscriptParser.ForeachStatementContext ctx) {
+        generator.setCurrentScopeLine(String.valueOf(ctx.block().start.getLine()));
+
         // Crear temporales para índice
         String temp_index = generator.newTemp();
         String temp_len = generator.newTemp();

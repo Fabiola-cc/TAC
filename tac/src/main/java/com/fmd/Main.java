@@ -50,7 +50,7 @@ public class Main {
         }
 
         System.out.println("\n=== TABLA DE SÍMBOLOS (SEMÁNTICO) ===\n");
-        visitor.getAllSymbols().forEach((name, sym) -> {
+        visitor.getRaiz().getAllScopesSymbols().forEach((name, sym) -> {
             System.out.println(sym.toString()); // o sym.toStringTAC()
         });
 
@@ -58,7 +58,7 @@ public class Main {
 
         // 7. Generar TAC
         System.out.println("\n=== GENERACIÓN DE TAC ===\n");
-        TACVisitor visitor_tac = new TACVisitor(visitor.getAllSymbols());
+        TACVisitor visitor_tac = new TACVisitor(visitor.getExistingScopes());
         visitor_tac.visit(tree);
 
         System.out.println("\n=== TABLA DE SÍMBOLOS ACTUALIZADA ===\n");
