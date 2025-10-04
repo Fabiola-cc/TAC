@@ -19,8 +19,25 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
     // EXPRESIONES BÁSICAS
     @Override
     public String visitLiteralExpr(CompiscriptParser.LiteralExprContext ctx) {
-        return ctx.getText();
+        String temp = generator.newTemp();
+        String value;
+
+        if (ctx.getText().equals("true")) {
+            value = "1";
+        } else if (ctx.getText().equals("false")) {
+            value = "0";
+        } else {
+            value = ctx.getText(); // número, string, etc.
+        }
+
+        TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        instr.setResult(temp);
+        instr.setArg1(value);
+        generator.addInstruction(instr);
+
+        return temp;
     }
+
 
     @Override
     public String visitIdentifierExpr(CompiscriptParser.IdentifierExprContext ctx) {

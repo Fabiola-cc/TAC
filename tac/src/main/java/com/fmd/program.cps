@@ -119,3 +119,7 @@ speak("Firulais");
 
 let name: string = "Alberto";
 print(name + " is here.");
+
+for (var j = 0; j < 3; j = j + 1) {
+    print(j);
+};

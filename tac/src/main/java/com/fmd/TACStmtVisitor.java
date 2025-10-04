@@ -404,13 +404,12 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
             visit(ctx.assignment());
         }
 
-        // 2. Crear etiquetas (inicio, fin, update)
+        // 2. Crear etiquetas (inicio y fin)
         String startLabel = generator.newLabel();
         String endLabel = generator.newLabel();
-        String updateLabel = generator.newLabel();
 
         // 3. Marcar inicio de loop
-        generator.enterLoop(endLabel, updateLabel);
+        generator.enterLoop(endLabel, null); // no necesitamos updateLabel
 
         // 4. Etiqueta de inicio del loop
         TACInstruction startLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
@@ -434,18 +433,12 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         // 7. Procesar cuerpo del loop
         visit(ctx.block());
 
-        // 8. Etiqueta update (solo si hay update en el for)
+        // 8. Generar expresión de actualización (incremento) inmediatamente después del cuerpo
         if (ctx.expression().size() > 1 && ctx.expression(1) != null) {
-            // Generar etiqueta update
-            TACInstruction updateLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
-            updateLblInstr.setLabel(updateLabel);
-            generator.addInstruction(updateLblInstr);
-
-            // Procesar expresión de actualización
             visit(ctx.expression(1));
         }
 
-        // 9. Goto inicio del loop
+        // 9. Saltar al inicio del loop
         TACInstruction gotoStart = new TACInstruction(TACInstruction.OpType.GOTO);
         gotoStart.setLabel(startLabel);
         generator.addInstruction(gotoStart);
@@ -460,6 +453,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
         return null;
     }
+
 
     // FUNCIONES
     @Override

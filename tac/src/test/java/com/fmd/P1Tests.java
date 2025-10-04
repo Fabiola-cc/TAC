@@ -20,9 +20,12 @@ public class P1Tests {
     void testLiteralAndArithmetic() {
         String code = "var a = 5 + 3 * 2;";
         List<String> expected = Arrays.asList(
-                "t1 = 3 * 2",
-                "t2 = 5 + t1",
-                "a = t2"
+                "t1 = 5",
+                "t2 = 3",
+                "t3 = 2",
+                "t4 = t2 * t3",
+                "t5 = t1 + t4",
+                "a = t5"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -31,7 +34,8 @@ public class P1Tests {
     void testAssignmentAndPrint() {
         String code = "var x = 10; print(x);";
         List<String> expected = Arrays.asList(
-                "x = 10",
+                "t1 = 10",
+                "x = t1",
                 "call print(x)"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -42,8 +46,9 @@ public class P1Tests {
     void testUnaryExpression() {
         String code = "var y = -5;";
         List<String> expected = Arrays.asList(
-                "t1 = -5",
-                "y = t1"
+                "t1 = 5",
+                "t2 = -t1",
+                "y = t2"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }

@@ -37,6 +37,8 @@ public class Main {
         SemanticVisitor visitor = new SemanticVisitor();
         visitor.visit(tree);
 
+        visitor.getAllSymbols();
+
         // 6. Mostrar errores
         if (!visitor.getErrores().isEmpty()) {
             System.out.println("Se encontraron errores semánticos:");
@@ -46,6 +48,11 @@ public class Main {
             System.out.println("¡¡¡ No se puede continuar con el TAC !!!");
             return;
         }
+
+        System.out.println("\n=== TABLA DE SÍMBOLOS (SEMÁNTICO) ===\n");
+        visitor.getAllSymbols().forEach((name, sym) -> {
+            System.out.println(sym.toString()); // o sym.toStringTAC()
+        });
 
         System.out.println("✓ No hay errores semánticos");
 

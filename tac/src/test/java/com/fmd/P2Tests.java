@@ -53,11 +53,12 @@ public class P2Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "if t1 == 0 goto L1",
-                "call print(t1)",
+                "t2 = 1",
+                "call print(t2)",
                 "goto L2",
                 "L1:",
-                "t2 = 0",
-                "call print(t2)",
+                "t3 = 0",
+                "call print(t3)",
                 "L2:"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -67,13 +68,16 @@ public class P2Tests {
     void testWhileStatement() {
         String code = "var i = 0; while (i < 3) { print(i); i = i + 1; }";
         List<String> expected = Arrays.asList(
-                "i = 0",
+                "t1 = 0",
+                "i = t1",
                 "L1:",
-                "t1 = i < 3",
-                "if t1 == 0 goto L2",
+                "t2 = 3",
+                "t3 = i < t2",
+                "if t3 == 0 goto L2",
                 "call print(i)",
-                "t2 = i + 1",
-                "i = t2",
+                "t4 = 1",
+                "t5 = i + t4",
+                "i = t5",
                 "goto L1",
                 "L2:"
         );
@@ -84,11 +88,16 @@ public class P2Tests {
     void testDoWhileStatement() {
         String code = "var j = 0; do { print(j); j = j + 1; } while (j < 3);";
         List<String> expected = Arrays.asList(
-                "j = 0",
+                "t1 = 0",
+                "j = t1",
                 "L1:",
                 "call print(j)",
-                "t1 = j < 3",
-                "if t1 != 0 goto L1",
+                "t2 = 1",
+                "t3 = j + t2",
+                "j = t3",
+                "t4 = 3",
+                "t5 = j < t4",
+                "if t5 != 0 goto L1",
                 "L2:"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -96,15 +105,19 @@ public class P2Tests {
 
     @Test
     void testForStatement() {
-        String code = "for (var k = 0; k < 3; k = k + 1) { print(k); }";
+        String code = "for (var j = 0; j < 3; j = j + 1) { print(j); }";
         List<String> expected = Arrays.asList(
-                "k = 0",
+                "j = 0",
                 "L1:",
-                "t1 = k < 3",
-                "if t1 == 0 goto L2",
-                "call print(k)",
-                "t2 = k + 1",
-                "k = t2",
+                "t1 = j",
+                "t2 = 3",
+                "t3 = t1 < t2",
+                "if t3 == 0 goto L2",
+                "call print(j)",
+                "t4 = j",
+                "t5 = 1",
+                "t6 = t4 + t5",
+                "j = t6",
                 "goto L1",
                 "L2:"
         );
