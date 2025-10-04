@@ -4,7 +4,9 @@ import com.fmd.CompiscriptParser;
 import com.fmd.CompiscriptBaseVisitor;
 import com.fmd.modules.Symbol;
 import com.fmd.modules.TACInstruction;
+import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -616,23 +618,79 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitSwitchStatement(CompiscriptParser.SwitchStatementContext ctx) {
-        // TODO P4: Implementar
-        // 1. Evaluar expresión del switch
-        // 2. Crear etiquetas para cada case y default
-        // 3. Para cada case:
-        //    a. Evaluar valor del case
-        //    b. Comparar con expresión del switch
-        //    c. Generar salto condicional
-        // 4. Generar salto a default
-        // 5. Para cada case:
-        //    a. Colocar etiqueta
-        //    b. Procesar statements
-        // 6. Colocar etiqueta default
-        // 7. Procesar default statements
-        // 8. Colocar etiqueta end
+        TACExprVisitor exprVisitor = new TACExprVisitor(generator);
+
+        // 1. Evaluar la expresión del switch y guardarla en un temporal
+        String switchExpr = exprVisitor.visit(ctx.expression());
+        String switchTemp = generator.newTemp();
+        TACInstruction assignSwitch = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        assignSwitch.setResult(switchTemp);
+        assignSwitch.setArg1(switchExpr);
+        generator.addInstruction(assignSwitch);
+
+        // 2. Crear etiqueta final del switch
+        String endLabel = generator.newLabel();
+
+        // 3. Crear etiquetas para cada case
+        List<String> caseLabels = new ArrayList<>();
+        for (int i = 0; i < ctx.switchCase().size(); i++) {
+            caseLabels.add(generator.newLabel());
+        }
+        String defaultLabel = ctx.defaultCase() != null ? generator.newLabel() : endLabel;
+
+        // 4. Generar comparaciones y saltos condicionales a cada case
+        for (int i = 0; i < ctx.switchCase().size(); i++) {
+            CompiscriptParser.SwitchCaseContext caseCtx = ctx.switchCase(i);
+            String caseValue = exprVisitor.visit(caseCtx.expression());
+
+            // if switchTemp == caseValue goto caseLabel
+            TACInstruction ifGoto = new TACInstruction(TACInstruction.OpType.IF_GOTO);
+            ifGoto.setArg1(switchTemp);
+            ifGoto.setArg2(caseValue);
+            ifGoto.setRelop("==");
+            ifGoto.setLabel(caseLabels.get(i));
+            generator.addInstruction(ifGoto);
+        }
+
+        // 5. Salto a default si ningún case coincide
+        TACInstruction gotoDefault = new TACInstruction(TACInstruction.OpType.GOTO);
+        gotoDefault.setLabel(defaultLabel);
+        generator.addInstruction(gotoDefault);
+
+        // 6. Generar código de cada case
+        for (int i = 0; i < ctx.switchCase().size(); i++) {
+            // Etiqueta del case
+            TACInstruction caseLabelInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+            caseLabelInstr.setLabel(caseLabels.get(i));
+            generator.addInstruction(caseLabelInstr);
+
+            // Statements del case
+            visit((ParseTree) ctx.switchCase(i).statement());
+
+            // Saltar al final del switch al terminar el case
+            TACInstruction gotoEnd = new TACInstruction(TACInstruction.OpType.GOTO);
+            gotoEnd.setLabel(endLabel);
+            generator.addInstruction(gotoEnd);
+        }
+
+        // 7. Generar código del default si existe
+        if (ctx.defaultCase() != null) {
+            TACInstruction defaultLabelInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+            defaultLabelInstr.setLabel(defaultLabel);
+            generator.addInstruction(defaultLabelInstr);
+
+            visit((ParseTree) ctx.defaultCase().statement());
+        }
+
+        // 8. Etiqueta final del switch
+        TACInstruction endInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        endInstr.setLabel(endLabel);
+        generator.addInstruction(endInstr);
 
         return null;
     }
+
+
 
     /**
      * Break statement:
@@ -670,11 +728,21 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitContinueStatement(CompiscriptParser.ContinueStatementContext ctx) {
-        // TODO P4: Implementar
-        // Similar a break pero usando getCurrentContinueLabel()
+        // 1. Obtener etiqueta de continue actual
+        String continueLabel = generator.getCurrentContinueLabel();
+
+        // 2. Verificar que exista (si no, error)
+        if (continueLabel != null) {
+            TACInstruction gotoContinue = new TACInstruction(TACInstruction.OpType.GOTO);
+            gotoContinue.setLabel(continueLabel);
+            generator.addInstruction(gotoContinue);
+        } else {
+            System.err.println("ERROR: continue fuera de un loop");
+        }
 
         return null;
     }
+
 
     /**
      * Try-Catch:
@@ -690,20 +758,43 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitTryCatchStatement(CompiscriptParser.TryCatchStatementContext ctx) {
-        // TODO P4: Implementar (simplificado)
-        // El manejo real de excepciones requiere soporte del runtime
         // 1. Crear etiquetas
+        String catchLabel = generator.newLabel();
+        String endLabel = generator.newLabel();
+
         // 2. Procesar bloque try
-        // 3. Generar goto al final
-        // 4. Colocar etiqueta catch
-        // 5. Asignar excepción a variable
+        visit(ctx.block(0)); // ctx.block(0) es el try
+
+        // 3. Salto al final del try
+        TACInstruction gotoEnd = new TACInstruction(TACInstruction.OpType.GOTO);
+        gotoEnd.setLabel(endLabel);
+        generator.addInstruction(gotoEnd);
+
+        // 4. Etiqueta catch
+        TACInstruction catchLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        catchLblInstr.setLabel(catchLabel);
+        generator.addInstruction(catchLblInstr);
+
+        // 5. Asignar excepción a variable del catch
+        String catchVar = ctx.Identifier().getText();
+        TACInstruction assignEx = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        assignEx.setResult(catchVar);
+        assignEx.setArg1("exception"); // representamos la excepción de forma abstracta
+        generator.addInstruction(assignEx);
+
         // 6. Procesar bloque catch
-        // 7. Colocar etiqueta end
+        visit(ctx.block(1)); // ctx.block(1) es el catch
+
+        // 7. Etiqueta final
+        TACInstruction endLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
+        endLblInstr.setLabel(endLabel);
+        generator.addInstruction(endLblInstr);
 
         return null;
     }
 
-    
+
+
     // POO (Clases y Objetos)
     /**
      * Declaración de clase:

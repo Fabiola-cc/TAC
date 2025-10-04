@@ -17,34 +17,46 @@ public class P2Tests {
     TestInit testInit = new TestInit();
 
     @Test
-    void testRelationalAndEquality() {
+    void testRelationalOperators() {
         String code = "let a = 5; let b = 10; print(a < b); print(a == b); print(a != b);";
         List<String> expected = Arrays.asList(
-                "a = 5",
-                "b = 10",
-                "t1 = a < b",
-                "call print(t1)",
-                "t2 = a == b",
-                "call print(t2)",
-                "t3 = a != b",
-                "call print(t3)"
+                "t1 = 5",
+                "a = t1",
+                "t2 = 10",
+                "b = t2",
+                "t3 = a < b",
+                "call print(t3)",
+                "t4 = a == b",
+                "call print(t4)",
+                "t5 = a != b",
+                "call print(t5)"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
+
 
     @Test
     void testLogicalOperators() {
         String code = "let x = true; let y = false; print(x && y); print(x || y);";
         List<String> expected = Arrays.asList(
-                "x = true",
-                "y = false",
-                "t1 = x && y",
-                "call print(t1)",
-                "t2 = x || y",
-                "call print(t2)"
+                "t1 = 1",
+                "x = t1",
+                "t2 = 0",
+                "y = t2",
+                "t3 = 0",
+                "if x == 0 goto L1",
+                "t3 = y",
+                "L1:",
+                "call print(t3)",
+                "t4 = 1",
+                "if x != 0 goto L2",
+                "t4 = y",
+                "L2:",
+                "call print(t4)"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
+
 
 
     @Test
