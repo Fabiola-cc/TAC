@@ -3,6 +3,7 @@ package com.fmd;
 import com.fmd.modules.Symbol;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -64,7 +65,7 @@ public class TACVisitor extends CompiscriptBaseVisitor<Void> {
      * Metodo para imprimir todos los simbolos
      */
     public void printTable(){
-        generator.imprimirSimbolos(new HashMap<>());
+        generator.imprimirSimbolos();
     }
 
     /**

@@ -32,7 +32,7 @@ public class TACGenerator {
     private String currentClass;           // Nombre de la clase actual
 
     // Tabla de simbolos
-    private final Map<String, SemanticVisitor.Entorno> scopeTable;
+    private Map<String, SemanticVisitor.Entorno> scopeTable = new LinkedHashMap<>();
     private String currentScopeLine;        // Id del scope actual
     private int currentOffset = 0;
 
@@ -109,9 +109,11 @@ public class TACGenerator {
      * Mantiene el control del offset en memoria
      */
     public int allocateLocal(int size) {
-        currentOffset += size;
-        return currentOffset; // devuelve el offset asignado
+        int assignedOffset = currentOffset; // inicio del bloque
+        currentOffset += size;              // avanzar para el siguiente
+        return assignedOffset;              // devolver el inicio real
     }
+
 
     // PRIORIDAD 2: MANEJO DE LOOPS (break/continue)
     /**
@@ -238,18 +240,21 @@ public class TACGenerator {
     }
 
     /** imprime recursivamente los símbolos por scope */
-    public void imprimirSimbolos(Map<String, Symbol> actualTable) {
-        if(actualTable.isEmpty()) {
-            actualTable.putAll(scopeTable.get("0").getAllSymbols());
-        }
-        for (Symbol entry : actualTable.values()) {
-            System.out.println(entry.toStringTAC());
-            if (!entry.getMembers().isEmpty()) {
-                System.out.println("\nScope (" + entry.getName() + ": " + entry.getKind()+ ")");
-                imprimirSimbolos(entry.getMembers());
+    public void imprimirSimbolos() {
+        System.out.println("===== TABLAS DE SÍMBOLOS POR SCOPE =====");
+        for (Map.Entry<String, SemanticVisitor.Entorno> entry : scopeTable.entrySet()) {
+            SemanticVisitor.Entorno entorno = entry.getValue();
+            Map<String, Symbol> locals = entorno.getSymbolsLocal(); // 👈 usa el local
+
+            System.out.println("Scope (" + locals.size() + " symbols)");
+            for (Symbol sym : locals.values()) {
+                System.out.println("  " + sym.toStringTAC());
             }
+            System.out.println();
         }
+        System.out.println("========================================");
     }
+
 
     public void setCurrentScopeLine(String currentScopeLine) {
         this.currentScopeLine = currentScopeLine;
