@@ -35,4 +35,28 @@ public class P5Tests {
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
+
+    @Test
+    void testClassWithThisUsage() {
+        String code = """
+        class Counter {
+            let value: integer = 0;
+            function inc() {
+                this.value = this.value + 1;
+            }
+        }
+        """;
+        List<String> expected = Arrays.asList(
+                "Counter:",
+                "t1 = 0",
+                "value = t1",
+                "inc:",
+                "t2 = this.value",
+                "t3 = 1",
+                "this.value = t2 + t3",
+                "end inc"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
+
 }

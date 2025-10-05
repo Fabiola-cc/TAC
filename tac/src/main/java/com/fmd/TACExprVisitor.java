@@ -334,34 +334,16 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         return temp;
     }
 
-
-
     private String handlePropertyAccess(CompiscriptParser.PropertyAccessExprContext ctx, String objName) {
-        // TODO implementar
-        // Extraer el nombre de la propiedad después del punto
-        String propertyName = ctx.Identifier().getText();
+        String propertyName = ctx.getText();
 
-        String searchName = null;
-        Symbol classSym = null;
+        String result = generator.newTemp();
+        TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        instr.setResult(result);
+        instr.setArg1(objName + propertyName);
+        generator.addInstruction(instr);
 
-        if(objName.equals("this")){
-            searchName = generator.getCurrentClass();
-        } else {
-            if (generator.getSymbol(objName) != null) {
-                searchName = generator.getSymbol(objName).getName();
-            }
-        }
-        classSym = generator.getSymbol(searchName);
-
-        if(classSym == null){
-            System.err.println(searchName+" not found");
-        }
-        assert classSym != null;
-        if (classSym.getMembers().containsKey(propertyName)){
-            return classSym.getMembers().get(propertyName).getName();
-        }
-
-        return objName + "." + propertyName;
+        return result;
     }
 
     @Override
