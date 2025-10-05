@@ -136,11 +136,18 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
             instr.setArg1(value);
             generator.addInstruction(instr);
         } else if (ctx.expression().size() == 2) {
-            // TODO: Asignación a propiedad que debe de ser agregado junto con los Metodos asignacion de propiedades y de arrays
-            /*
-            * obj.prop = expr (asignación a propiedad - Prioridad 5)
-            * array[i] = expr (asignación a array - Prioridad 4)
-            */
+            String result = exprVisitor.visit(ctx.expression(0));
+            result = result + "." + ctx.Identifier().getText();
+
+            String rhs = exprVisitor.visit(ctx.expression(1));
+
+            // Generar TAC
+            TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+            instr.setResult(result);
+            instr.setArg1(rhs);
+            generator.addInstruction(instr);
+
+            return null;
         }
 
         return null;

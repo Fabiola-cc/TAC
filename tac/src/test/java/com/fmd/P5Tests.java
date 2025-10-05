@@ -53,7 +53,8 @@ public class P5Tests {
                 "inc:",
                 "t2 = this.value",
                 "t3 = 1",
-                "this.value = t2 + t3",
+                "t4 = t2 + t3",
+                "this.value = t4",
                 "end inc"
         );
         assertEquals(expected, testInit.generateTAC(code));

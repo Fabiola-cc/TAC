@@ -488,6 +488,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
     public String visitAssignExpr(CompiscriptParser.AssignExprContext ctx) {
         // ctx.lhs = lhs, ctx.assignmentExpr() = rhs
         String lhs = ctx.lhs.getText();
+
         String rhs = visit(ctx.assignmentExpr()); // recursivo para rhs
 
         // Generar TAC
