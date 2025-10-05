@@ -24,9 +24,10 @@ public class P3Tests {
                 "}";
         List<String> expected = Arrays.asList(
                 "speak:",
-                "printVar = \" makes a sound.\"",
-                "t1 = name + printVar",
-                "return t1",
+                "t1 = \" makes a sound.\"",
+                "printVar = t1",
+                "t2 = name + printVar",
+                "return t2",
                 "end speak"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -40,12 +41,14 @@ public class P3Tests {
                 "}\n" + "speak(\"hola\");";
         List<String> expected = Arrays.asList(
                 "speak:",
-                "printVar = \" makes a sound.\"",
-                "t1 = name + printVar",
-                "return t1",
+                "t1 = \" makes a sound.\"",
+                "printVar = t1",
+                "t2 = name + printVar",
+                "return t2",
                 "end speak",
-                "t2 = \"hola\"",
-                "call speak(t2)"
+                "t4 = \"hola\"",
+                "t3 = t4",
+                "call speak(t3)"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
