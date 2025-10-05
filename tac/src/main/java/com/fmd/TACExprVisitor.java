@@ -405,4 +405,21 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         }
         return visitChildren(ctx);
     }
+
+    @Override
+    public String visitAssignExpr(CompiscriptParser.AssignExprContext ctx) {
+        // ctx.lhs = lhs, ctx.assignmentExpr() = rhs
+        String lhs = ctx.lhs.getText();
+        String rhs = visit(ctx.assignmentExpr()); // recursivo para rhs
+
+        // Generar TAC
+        TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        instr.setResult(lhs);
+        instr.setArg1(rhs);
+        generator.addInstruction(instr);
+
+        return lhs; // devuelve el nombre de la variable asignada
+    }
+
+
 }

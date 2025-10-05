@@ -119,17 +119,16 @@ public class P2Tests {
     void testForStatement() {
         String code = "for (var j = 0; j < 3; j = j + 1) { print(j); }";
         List<String> expected = Arrays.asList(
-                "j = 0",
+                "t1 = 0",
+                "j = t1",
                 "L1:",
-                "t1 = j",
                 "t2 = 3",
-                "t3 = t1 < t2",
+                "t3 = j < t2",
                 "if t3 == 0 goto L2",
                 "call print(j)",
-                "t4 = j",
-                "t5 = 1",
-                "t6 = t4 + t5",
-                "j = t6",
+                "t4 = 1",
+                "t5 = j + t4",
+                "j = t5",
                 "goto L1",
                 "L2:"
         );

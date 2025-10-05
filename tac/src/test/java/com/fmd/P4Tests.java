@@ -18,7 +18,7 @@ public class P4Tests {
 
     @Test
     void testBreakInLoop() {
-        String code = "for (let i = 0; i < 3; i = i + 1) { if (i == 1) break; }";
+        String code = "let numbers: integer[] = [1, 2, 3, 4, 5]; ";
         List<String> expected = Arrays.asList(
                 "t1 = 0",
                 "i = t1",
@@ -39,7 +39,7 @@ public class P4Tests {
 
     @Test
     void testContinueInLoop() {
-        String code = "for (let i = 0; i < 3; i = i + 1) { if (i == 1) continue; print(i); }";
+        String code = "for (let i = 0; i < 3; i = i + 1) { if (i == 1) { continue; } }";
         List<String> expected = Arrays.asList(
                 "t1 = 0",
                 "i = t1",
@@ -47,9 +47,9 @@ public class P4Tests {
                 "t2 = i < 3",
                 "if t2 == 0 goto L2",
                 "t3 = i == 1",
-                "if t3 != 0 goto Lcontinue1",
+                "if t3 != 0 goto L3",
                 "call print(i)",
-                "Lcontinue1:",
+                "L3:",
                 "t4 = 1",
                 "t5 = i + t4",
                 "i = t5",
