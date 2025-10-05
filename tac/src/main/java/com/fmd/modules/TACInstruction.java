@@ -16,6 +16,7 @@ public class TACInstruction {
         GOTO,          // goto label
         IF_GOTO,       // if x relop y goto label
         CALL,          // call f
+        NEW,            // new object
         RETURN,         // return x
         END             // end f
     }
@@ -68,6 +69,8 @@ public class TACInstruction {
                 return "if " + arg1 + " " + relop + " " + arg2 + " goto " + label;
             case CALL:
                 return "call " + arg1 + "(" + String.join(", ", params) + ")";
+            case NEW:
+                return result + " = " + "new " + arg1 + "(" + String.join(", ", params) + ")";
             case RETURN:
                 return "return " + arg1;
             case END:

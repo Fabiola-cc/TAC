@@ -76,6 +76,31 @@ public class P4Tests {
     }
 
     @Test
+    void testForEachLoop() {
+        String code = "let numbers: integer[] = [1, 2, 3, 4, 5];\n" +
+                "foreach (num in numbers) {\n" +
+                "    print(num);\n" +
+                "}\n";
+        List<String> expected = Arrays.asList(
+                "t1 = [1,2,3,4,5]",
+                "numbers = t1",
+                "t2 = 0",
+                "t3 = 5",
+                "L1:",
+                "t4 = t2 < t3",
+                "if t4 == 0 goto L2",
+                "t5 = numbers[t2]",
+                "num = t5",
+                "call print(num)",
+                "t6 = t2 + 1",
+                "t2 = t6",
+                "goto L1",
+                "L2:"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
+
+    @Test
     void testConstDeclaration() {
         String code = "const MSG: string = \"Hello\";";
         List<String> expected = Arrays.asList(

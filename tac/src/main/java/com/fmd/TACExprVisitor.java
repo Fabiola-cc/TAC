@@ -2,6 +2,7 @@ package com.fmd;
 
 import com.fmd.CompiscriptParser;
 import com.fmd.CompiscriptBaseVisitor;
+import com.fmd.modules.Symbol;
 import com.fmd.modules.TACInstruction;
 import org.antlr.v4.runtime.RuleContext;
 
@@ -336,8 +337,31 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
 
     private String handlePropertyAccess(CompiscriptParser.PropertyAccessExprContext ctx, String objName) {
-        // TODO P5: Implementar
-        return null;
+        // TODO implementar
+        // Extraer el nombre de la propiedad después del punto
+        String propertyName = ctx.Identifier().getText();
+
+        String searchName = null;
+        Symbol classSym = null;
+
+        if(objName.equals("this")){
+            searchName = generator.getCurrentClass();
+        } else {
+            if (generator.getSymbol(objName) != null) {
+                searchName = generator.getSymbol(objName).getName();
+            }
+        }
+        classSym = generator.getSymbol(searchName);
+
+        if(classSym == null){
+            System.err.println(searchName+" not found");
+        }
+        assert classSym != null;
+        if (classSym.getMembers().containsKey(propertyName)){
+            return classSym.getMembers().get(propertyName).getName();
+        }
+
+        return objName + "." + propertyName;
     }
 
     @Override
@@ -428,8 +452,29 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
     @Override
     public String visitNewExpr(CompiscriptParser.NewExprContext ctx) {
-        // TODO P5: Implementar
-        return null;
+        String result = generator.newTemp();
+
+        String className = ctx.Identifier().getText();
+        TACInstruction newInstruction = new TACInstruction(TACInstruction.OpType.NEW);
+        newInstruction.setResult(result);
+        newInstruction.setArg1(className);
+
+        if (ctx.arguments() != null) {
+            List<CompiscriptParser.ExpressionContext> args = ctx.arguments().expression();
+            for (CompiscriptParser.ExpressionContext arg : args) {
+                String tempName = generator.newTemp();
+                String literalValue = visit(arg); // evaluar expresion
+
+                TACInstruction paramInstruction = new TACInstruction(TACInstruction.OpType.ASSIGN);
+                paramInstruction.setResult(tempName);
+                paramInstruction.setArg1(literalValue);
+                generator.addInstruction(paramInstruction);
+
+                newInstruction.addParam(tempName); // guardarla como parametro
+            }
+        }
+        generator.addInstruction(newInstruction);
+        return result;
     }
 
     @Override

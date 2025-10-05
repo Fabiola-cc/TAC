@@ -41,7 +41,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         this.funcsVisitor = new TACFuncsVisitor(this, generator);
     }
 
-    
+
     // STATEMENTS BÁSICOS
     /**
      * Permite reconocer el offset de cada variable según su tipo
@@ -189,7 +189,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         return null;
     }
 
-    
+
     // CONTROL DE FLUJO
     /**
      * Bloque:
@@ -818,8 +818,6 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         return null;
     }
 
-
-
     // POO (Clases y Objetos)
     /**
      * Declaración de clase:
@@ -831,18 +829,47 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitClassDeclaration(CompiscriptParser.ClassDeclarationContext ctx) {
-        // TODO P5: Implementar
-        // 1. Obtener nombre de la clase
-        // 2. Obtener clase padre (si existe)
-        // 3. Marcar inicio de clase: generator.enterClass(name)
-        // 4. Generar etiqueta class_name:
-        // 5. Procesar cada miembro (variables, funciones)
-        // 6. Marcar fin de clase: generator.exitClass()
+        // Obtener nombre de la clase
+        String className = ctx.Identifier(0).getText();
+
+        // Buscar en la tabla de simbolos
+        generator.setCurrentScopeLine(String.valueOf(ctx.start.getLine()));
+        Symbol classSym = generator.getSymbol(className);
+
+        // Obtener clase padre (si existe)
+        String parentName = null;
+        if (ctx.Identifier(1) != null) {
+            parentName = ctx.Identifier(1).getText();
+        }
+        // Marcar inicio de clase:
+        generator.enterClass(className);
+
+        // Generar etiqueta class_name:
+        TACInstruction classLabel = new TACInstruction(TACInstruction.OpType.LABEL);
+        classLabel.setLabel(className);
+        generator.addInstruction(classLabel);
+
+        // Procesar cada miembro (variables, funciones)
+        List<CompiscriptParser.ClassMemberContext> members = ctx.classMember();
+        for (CompiscriptParser.ClassMemberContext member : members) {
+            if (member.variableDeclaration() != null){
+                visit(member.variableDeclaration());
+            }
+            if (member.functionDeclaration() != null){
+                visit(member.functionDeclaration());
+            }
+            if (member.constantDeclaration() != null){
+                visit(member.constantDeclaration());
+            }
+        }
+
+        // Marcar fin de clase
+        generator.exitClass();
 
         return null;
     }
 
-    
+
     // UTILIDADES
     /**
      * Metodo genérico para visitar cualquier statement
