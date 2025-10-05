@@ -482,8 +482,28 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitConstantDeclaration(CompiscriptParser.ConstantDeclarationContext ctx) {
-        // TODO P4: Implementar
-        // Similar a variableDeclaration
+        // Obtener nombre de la variable
+        String varName = ctx.Identifier().getText();
+        Symbol varSym = generator.getSymbol(varName);
+
+        if (varSym == null) {
+            System.err.println(varName + " is not a variable");
+            return null;
+        }
+
+        // Información para tabla de símbolos
+        varSym.setTacAddress(varName); // en TAC usaremos el mismo nombre
+        varSym.setSize(typeSize(varSym.getType())); // ej: 4 para int, 8 para string
+        varSym.setOffset(generator.allocateLocal(varSym.getSize()));
+
+        // Evaluar la expresión (llamar a exprVisitor)
+        String value = exprVisitor.visit(ctx.expression());
+
+        // Generar instrucción ASSIGN
+        TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        instr.setResult(varName);
+        instr.setArg1(value);
+        generator.addInstruction(instr);
 
         return null;
     }

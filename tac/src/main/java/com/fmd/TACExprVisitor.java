@@ -3,6 +3,7 @@ package com.fmd;
 import com.fmd.CompiscriptParser;
 import com.fmd.CompiscriptBaseVisitor;
 import com.fmd.modules.TACInstruction;
+import org.antlr.v4.runtime.RuleContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -365,14 +366,64 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
     }
 
 
-
+    /**
+     * cond ? expr1 : expr2
+     *
+     * @param ctx the parse tree
+     * @return String result
+     */
     @Override
     public String visitTernaryExpr(CompiscriptParser.TernaryExprContext ctx) {
         if (ctx.logicalOrExpr() != null && ctx.expression().isEmpty()) {
             return visit(ctx.logicalOrExpr());
         }
-        // TODO P4: Implementar
-        return null;
+
+        String labelTrue =generator.newLabel();
+        String labelFalse =generator.newLabel();
+        String labelEnd =generator.newLabel();
+
+        String orExpr = visit(ctx.logicalOrExpr());
+        TACInstruction init = new TACInstruction(TACInstruction.OpType.IF_GOTO);
+        init.setArg1(orExpr);
+        init.setRelop("==");
+        init.setArg2("1"); // True
+        init.setLabel(labelTrue);
+        generator.addInstruction(init);
+
+        TACInstruction elseInstr = new TACInstruction(TACInstruction.OpType.GOTO);
+        elseInstr.setLabel(labelFalse);
+        generator.addInstruction(elseInstr);
+
+        TACInstruction initLabel = new TACInstruction(TACInstruction.OpType.LABEL);
+        initLabel.setLabel(labelTrue);
+        generator.addInstruction(initLabel);
+
+        String result = generator.newTemp();
+        String trueResult = visit(ctx.expression(0));
+        TACInstruction assignTrueInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        assignTrueInstr.setResult(result);
+        assignTrueInstr.setArg1(trueResult);
+        generator.addInstruction(assignTrueInstr);
+
+        TACInstruction toEndInstr = new TACInstruction(TACInstruction.OpType.GOTO);
+        toEndInstr.setLabel(labelEnd);
+        generator.addInstruction(toEndInstr);
+
+        TACInstruction elseLabel = new TACInstruction(TACInstruction.OpType.LABEL);
+        elseLabel.setLabel(labelFalse);
+        generator.addInstruction(elseLabel);
+
+        String falseResult = visit(ctx.expression(1));
+        TACInstruction assignFalseInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        assignFalseInstr.setResult(result);
+        assignFalseInstr.setArg1(falseResult);
+        generator.addInstruction(assignFalseInstr);
+
+        TACInstruction endLabel = new TACInstruction(TACInstruction.OpType.LABEL);
+        endLabel.setLabel(labelEnd);
+        generator.addInstruction(endLabel);
+
+        return result;
     }
 
     @Override
