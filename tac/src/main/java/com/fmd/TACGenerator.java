@@ -247,6 +247,10 @@ public class TACGenerator {
         return null; // No existe ni afuera ni dentro del scope actual
     }
 
+    public SemanticVisitor.Entorno getScope(String line) {
+        return scopeTable.get(line);
+    }
+
     public Map<String, Symbol> getSymbolTable(String line) {
         return scopeTable.get(line).getSymbolsLocal();
     }
