@@ -94,6 +94,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
         // Generar instrucciones TAC si tiene inicializador
         if (ctx.initializer() != null) {
+            generator.setAssignment(true);
             String value = exprVisitor.visit(ctx.initializer().expression());
 
             // Evita instrucciones redundantes
@@ -103,6 +104,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
                 instr.setArg1(value);
                 generator.addInstruction(instr);
             }
+            generator.setAssignment(false);
         }
 
         return null;

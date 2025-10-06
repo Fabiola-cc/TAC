@@ -80,6 +80,39 @@ public class P3Tests {
     }
 
     @Test
+    @DisplayName("Closure que captura variable externa")
+    void testClosureCapture() {
+        String code = """
+            function makeAdder(x: integer) {
+                function add(y: integer): integer {
+                    return x + y;
+                }
+                return add;
+            }
+            
+            let add5 = makeAdder(5);
+            add5(3);
+        """;
+        List<String> expected = Arrays.asList(
+                "makeAdder:",
+                "add:",
+                "t1 = x + y",
+                "return t1",
+                "end add",
+                "return add",
+                "end makeAdder",
+                "t4 = 5",
+                "t3 = t4",
+                "t2 = call makeAdder(t3)",
+                "add5 = t2",
+                "t6 = 3",
+                "t5 = t6",
+                "call add5(t5)"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
+
+    @Test
     @DisplayName("Función anidada con múltiples niveles de alcance")
     void testDeeplyNestedFunctions() {
         String code = """
@@ -116,4 +149,40 @@ public class P3Tests {
         assertEquals(expected, testInit.generateTAC(code));
     }
 
+    @Test
+    @DisplayName("Variables externas modificadas dentro de función anidada")
+    void testClosureModifyOuterVar() {
+        String code = """
+            function counter() {
+                let count: integer = 0;
+                function inc() {
+                    count = count + 1;
+                    return count;
+                }
+                return inc;
+            }
+            
+            let c = counter();
+            c();
+            c();
+        """;
+        List<String> expected = Arrays.asList(
+                "counter:",
+                "t1 = 0",
+                "count = t1",
+                "inc:",
+                "t2 = 1",
+                "t3 = count + t2",
+                "count = t3",
+                "return count",
+                "end inc",
+                "return inc",
+                "end counter",
+                "t4 = call counter()",
+                "c = t4",
+                "call c()",
+                "call c()"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
 }

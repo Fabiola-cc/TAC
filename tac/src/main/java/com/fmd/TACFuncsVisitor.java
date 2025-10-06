@@ -88,14 +88,17 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
         generator.setAssignment(true);
         TACInstruction returnInstruction = new TACInstruction(TACInstruction.OpType.RETURN);
 
-        // Si hay expresión, evaluarla
-        if(ctx.expression()!=null){
-            stmtVisitor.visit(ctx.expression()); // evaluar expresion
-            String lastVar = generator.getLastInstruction().getResult(); // tomar la última variable temporal registrada
-            returnInstruction.setArg1(lastVar); // usarla como argumento de return
-        } else { // Si no hay expresión, usar "null"
-            returnInstruction.setArg1("null");
+        String result = "null";
+        if(ctx.expression()!=null){ // Si hay expresión, evaluarla
+            if(generator.getSymbol(ctx.expression().getText())!=null){
+                result = generator.getSymbol(ctx.expression().getText()).getName();
+            } else {
+                stmtVisitor.visit(ctx.expression()); // evaluar expresion
+                result = generator.getLastInstruction().getResult(); // tomar la última variable temporal registrada
+            }
+
         }
+        returnInstruction.setArg1(result); // argumento de return
 
         generator.addInstruction(returnInstruction);
         generator.setAssignment(false);
