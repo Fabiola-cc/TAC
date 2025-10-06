@@ -30,7 +30,8 @@ public class P5Tests {
                 "t1 = \"doggy\"",
                 "name = t1",
                 "speak:",
-                "call print(name)",
+                "t2 = name",
+                "call print(t2)",
                 "end speak"
         );
         assertEquals(expected, testInit.generateTAC(code));

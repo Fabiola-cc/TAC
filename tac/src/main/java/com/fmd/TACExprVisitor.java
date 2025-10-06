@@ -22,12 +22,11 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
     // EXPRESIONES BÁSICAS
     @Override
     public String visitLiteralExpr(CompiscriptParser.LiteralExprContext ctx) {
+
         // Si es un array literal
         if (ctx.arrayLiteral() != null) {
-            visitArrayLiteral(ctx.arrayLiteral());
-            return null;
-        }
-        else {
+            return visitArrayLiteral(ctx.arrayLiteral());
+        } else {
             String temp = generator.newTemp();
             String value;
 
@@ -47,6 +46,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
             return temp;
         }
     }
+
 
 
 

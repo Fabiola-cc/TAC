@@ -79,7 +79,6 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitVariableDeclaration(CompiscriptParser.VariableDeclarationContext ctx) {
-        // Obtener nombre de la variable
         String varName = ctx.Identifier().getText();
         Symbol varSym = generator.getSymbol(varName);
 
@@ -89,24 +88,27 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         }
 
         // Información para tabla de símbolos
-        varSym.setTacAddress(varName); // en TAC usaremos el mismo nombre
-        varSym.setSize(typeSize(varSym.getType())); // ej: 4 para int, 8 para string
+        varSym.setTacAddress(varName);
+        varSym.setSize(typeSize(varSym.getType()));
         varSym.setOffset(generator.allocateLocal(varSym.getSize()));
 
-        // generar instrucciones TAC si tiene inicializador
+        // Generar instrucciones TAC si tiene inicializador
         if (ctx.initializer() != null) {
-            // Evaluar la expresión (llamar a exprVisitor)
             String value = exprVisitor.visit(ctx.initializer().expression());
 
-            // Generar instrucción ASSIGN
-            TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
-            instr.setResult(varName);
-            instr.setArg1(value);
-            generator.addInstruction(instr);
+            // Evita instrucciones redundantes
+            if (value != null && !value.equals(varName)) {
+                TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+                instr.setResult(varName);
+                instr.setArg1(value);
+                generator.addInstruction(instr);
+            }
         }
 
         return null;
     }
+
+
 
     /**
      * Asignación simple:

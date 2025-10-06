@@ -41,15 +41,18 @@ public class SwitchBreakTests {
                 "goto L4",
                 "L2:",
                 "t5 = 1",
-                "call print(t5)",
-                "goto L1",          // Break automático (sin duplicado)
-                "L3:",
-                "t6 = 2",
+                "t6 = t5",
                 "call print(t6)",
                 "goto L1",          // Break automático (sin duplicado)
+                "L3:",
+                "t7 = 2",
+                "t8 = t7",
+                "call print(t8)",
+                "goto L1",          // Break automático (sin duplicado)
                 "L4:",
-                "t7 = 0",
-                "call print(t7)",
+                "t9 = 0",
+                "t10 = t9",
+                "call print(t10)",
                 "L1:"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -80,15 +83,18 @@ public class SwitchBreakTests {
                 "goto L4",
                 "L2:",
                 "t5 = \"Inicio de semana\"",
-                "call print(t5)",
-                "goto L1",
-                "L3:",
-                "t6 = \"Fin de semana\"",
+                "t6 = t5",
                 "call print(t6)",
                 "goto L1",
+                "L3:",
+                "t7 = \"Fin de semana\"",
+                "t8 = t7",
+                "call print(t8)",
+                "goto L1",
                 "L4:",
-                "t7 = \"Otro dia\"",
-                "call print(t7)",
+                "t9 = \"Otro dia\"",
+                "t10 = t9",
+                "call print(t10)",
                 "L1:"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -117,14 +123,17 @@ public class SwitchBreakTests {
                 "goto L1",
                 "L2:",
                 "t5 = 1",
-                "call print(t5)",
+                "t6 = t5",
+                "call print(t6)",
                 "goto L1",
                 "L3:",
-                "t6 = 2",
-                "call print(t6)",
+                "t7 = 2",
+                "t8 = t7",
+                "call print(t8)",
                 "goto L1",
                 "L1:"
         );
+
         assertEquals(expected, testInit.generateTAC(code));
     }
 
@@ -159,17 +168,21 @@ public class SwitchBreakTests {
                 "goto L4",
                 "L2:",
                 "t5 = 1",
-                "call print(t5)",
-                "goto L1",          // Break explícito (SIN duplicado)
-                "L3:",
-                "t6 = 2",
+                "t6 = t5",
                 "call print(t6)",
                 "goto L1",          // Break explícito (SIN duplicado)
+                "L3:",
+                "t7 = 2",
+                "t8 = t7",
+                "call print(t8)",
+                "goto L1",          // Break explícito (SIN duplicado)
                 "L4:",
-                "t7 = 0",
-                "call print(t7)",
+                "t9 = 0",
+                "t10 = t9",
+                "call print(t10)",
                 "L1:"
         );
+
         assertEquals(expected, testInit.generateTAC(code));
     }
 
@@ -202,12 +215,14 @@ public class SwitchBreakTests {
                 "L2:",
                 "t6 = 10",
                 "y = t6",
-                "call print(y)",
+                "t7 = y",
+                "call print(t7)",
                 "goto L1",
                 "L3:",
-                "t7 = 20",
-                "y = t7",
-                "call print(y)",
+                "t8 = 20",
+                "y = t8",
+                "t9 = y",
+                "call print(t9)",
                 "goto L1",
                 "L1:"
         );
@@ -240,17 +255,21 @@ public class SwitchBreakTests {
                 "goto L4",
                 "L2:",
                 "t5 = 1",
-                "call print(t5)",
-                "goto L1",          // Break explícito
-                "L3:",
-                "t6 = 2",
+                "t6 = t5",
                 "call print(t6)",
-                "goto L1",          // Break automático
+                "goto L1",
+                "L3:",
+                "t7 = 2",
+                "t8 = t7",
+                "call print(t8)",
+                "goto L1",
                 "L4:",
-                "t7 = 0",
-                "call print(t7)",
+                "t9 = 0",
+                "t10 = t9",
+                "call print(t10)",
                 "L1:"
         );
+
         assertEquals(expected, testInit.generateTAC(code));
     }
 
@@ -314,10 +333,11 @@ public class SwitchBreakTests {
                 "if t5 == 0 goto L3",
                 "goto L2",
                 "L3:",
-                "call print(i)",
-                "t6 = 1",
-                "t7 = i + t6",
-                "i = t7",
+                "t6 = i",
+                "call print(t6)",
+                "t7 = 1",
+                "t8 = i + t7",
+                "i = t8",
                 "goto L1",
                 "L2:"
         );
@@ -357,19 +377,22 @@ public class SwitchBreakTests {
                 "goto L3",
                 "L4:",
                 "t7 = 0",
-                "call print(t7)",
-                "goto L3",          // Break automático
-                "L5:",
-                "t8 = 1",
+                "t8 = t7",
                 "call print(t8)",
-                "goto L3",          // Break explícito (SIN duplicado)
-                "L3:",
+                "goto L3",
+                "L5:",
                 "t9 = 1",
-                "t10 = i + t9",
-                "i = t10",
+                "t10 = t9",
+                "call print(t10)",
+                "goto L3",
+                "L3:",
+                "t11 = 1",
+                "t12 = i + t11",
+                "i = t12",
                 "goto L1",
                 "L2:"
         );
+
         assertEquals(expected, testInit.generateTAC(code));
     }
 
@@ -394,7 +417,8 @@ public class SwitchBreakTests {
                 "goto L2",
                 "L2:",
                 "t3 = 999",
-                "call print(t3)",
+                "t4 = t3",
+                "call print(t4)",
                 "L1:"
         );
         assertEquals(expected, testInit.generateTAC(code));

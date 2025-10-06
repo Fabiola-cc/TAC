@@ -64,12 +64,14 @@ public class P4Tests {
         String code = "try { print(1); } catch (e) { print(2); }";
         List<String> expected = Arrays.asList(
                 "t1 = 1",
-                "call print(t1)",
+                "t2 = t1",
+                "call print(t2)",
                 "goto L2",
                 "L1:",
                 "e = exception",
-                "t2 = 2",
-                "call print(t2)",
+                "t3 = 2",
+                "t4 = t3",
+                "call print(t4)",
                 "L2:"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -91,9 +93,10 @@ public class P4Tests {
                 "if t4 == 0 goto L2",
                 "t5 = numbers[t2]",
                 "num = t5",
-                "call print(num)",
-                "t6 = t2 + 1",
-                "t2 = t6",
+                "t6 = num",
+                "call print(t6)",
+                "t7 = t2 + 1",
+                "t2 = t7",
                 "goto L1",
                 "L2:"
         );
