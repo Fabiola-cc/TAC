@@ -819,11 +819,13 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      * Try-Catch:
      *      try { ... } catch (err) { ... }
      *
-     * TAC generado (simplificado):
+     * TAC generado:
+     *   try_begin Lcatch     // Registrar handler
      *   [bloque try]
-     *   goto Lend
+     *   try_end              // Fin de región protegida
+     *   goto Lend            // Skip catch en caso normal
      * Lcatch:
-     *   err = exception
+     *   err = exception      // Capturar excepción del runtime
      *   [bloque catch]
      * Lend:
      */
@@ -833,30 +835,39 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         String catchLabel = generator.newLabel();
         String endLabel = generator.newLabel();
 
-        // 2. Procesar bloque try
-        visit(ctx.block(0)); // ctx.block(0) es el try
+        // 2. Marcar inicio de región try (registrar handler)
+        TACInstruction tryBegin = new TACInstruction(TACInstruction.OpType.TRY_BEGIN);
+        tryBegin.setLabel(catchLabel);  // Apunta al catch
+        generator.addInstruction(tryBegin);
 
-        // 3. Salto al final del try
+        // 3. Procesar bloque try
+        visit(ctx.block(0));
+
+        // 4. Marcar fin de región try
+        TACInstruction tryEnd = new TACInstruction(TACInstruction.OpType.TRY_END);
+        generator.addInstruction(tryEnd);
+
+        // 5. Si el try termina normalmente, saltar al final
         TACInstruction gotoEnd = new TACInstruction(TACInstruction.OpType.GOTO);
         gotoEnd.setLabel(endLabel);
         generator.addInstruction(gotoEnd);
 
-        // 4. Etiqueta catch
+        // 6. Etiqueta del catch (handler de excepciones)
         TACInstruction catchLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
         catchLblInstr.setLabel(catchLabel);
         generator.addInstruction(catchLblInstr);
 
-        // 5. Asignar excepción a variable del catch
+        // 7. Asignar excepción capturada a variable del catch
         String catchVar = ctx.Identifier().getText();
         TACInstruction assignEx = new TACInstruction(TACInstruction.OpType.ASSIGN);
         assignEx.setResult(catchVar);
-        assignEx.setArg1("exception"); // representamos la excepción de forma abstracta
+        assignEx.setArg1("exception");  // Valor abstracto que el runtime provee
         generator.addInstruction(assignEx);
 
-        // 6. Procesar bloque catch
-        visit(ctx.block(1)); // ctx.block(1) es el catch
+        // 8. Procesar bloque catch
+        visit(ctx.block(1));
 
-        // 7. Etiqueta final
+        // 9. Etiqueta final
         TACInstruction endLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
         endLblInstr.setLabel(endLabel);
         generator.addInstruction(endLblInstr);
