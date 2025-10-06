@@ -28,7 +28,7 @@ public class P4Tests {
                 "if t3 == 0 goto L2",
                 "t4 = 1",
                 "t5 = i == t4",
-                "if t5 != 0 goto L3",
+                "if t5 == 0 goto L3",
                 "L3:",
                 "t6 = 1",
                 "t7 = i + t6",
