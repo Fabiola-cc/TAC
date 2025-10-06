@@ -5,6 +5,7 @@ import com.fmd.CompiscriptBaseVisitor;
 import com.fmd.modules.Symbol;
 import com.fmd.modules.TACInstruction;
 import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,24 +22,32 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
     // EXPRESIONES BÁSICAS
     @Override
     public String visitLiteralExpr(CompiscriptParser.LiteralExprContext ctx) {
-        String temp = generator.newTemp();
-        String value;
-
-        if (ctx.getText().equals("true")) {
-            value = "1";
-        } else if (ctx.getText().equals("false")) {
-            value = "0";
-        } else {
-            value = ctx.getText(); // número, string, etc.
+        // Si es un array literal
+        if (ctx.arrayLiteral() != null) {
+            visitArrayLiteral(ctx.arrayLiteral());
+            return null;
         }
+        else {
+            String temp = generator.newTemp();
+            String value;
 
-        TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
-        instr.setResult(temp);
-        instr.setArg1(value);
-        generator.addInstruction(instr);
+            if (ctx.getText().equals("true")) {
+                value = "1";
+            } else if (ctx.getText().equals("false")) {
+                value = "0";
+            } else {
+                value = ctx.getText(); // número, string, etc.
+            }
 
-        return temp;
+            TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+            instr.setResult(temp);
+            instr.setArg1(value);
+            generator.addInstruction(instr);
+
+            return temp;
+        }
     }
+
 
 
     @Override
@@ -321,18 +330,21 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
     }
 
     private String handleArrayAccess(CompiscriptParser.IndexExprContext ctx, String arrayName) {
+        // Evaluar el índice
         String indexVal = visit(ctx.expression());
+
+        // Crear temporal que contendrá el valor del array en ese índice
         String temp = generator.newTemp();
 
-        TACInstruction instr = new TACInstruction(TACInstruction.OpType.BINARY_OP);
+        // Generar TAC: temporal = array[index]
+        TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
         instr.setResult(temp);
-        instr.setArg1(arrayName);
-        instr.setArg2(indexVal);
-        instr.setOperator("[]"); // operador ficticio para acceso
+        instr.setArg1(arrayName + "[" + indexVal + "]");
         generator.addInstruction(instr);
 
         return temp;
     }
+
 
     private String handlePropertyAccess(CompiscriptParser.PropertyAccessExprContext ctx, String objName) {
         String propertyName = ctx.getText();
@@ -349,7 +361,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
     @Override
     public String visitArrayLiteral(CompiscriptParser.ArrayLiteralContext ctx) {
         //  Obtener nombre del array desde la variable declarada
-        String varName = ctx.getParent().getChild(1).getText(); // "let numbers = [...]"
+        String varName = getAssignedVariable(ctx); // "let numbers = [...]"
         Symbol arraySym = generator.getSymbol(varName);
 
         // Tamaño por elemento (ejemplo: integer = 4 bytes)
@@ -375,16 +387,26 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         for (int i = 0; i < length; i++) {
             String val = visit(ctx.expression(i));
 
-            // Offset real dentro del frame = offset base + i * elementSize
-            int elemOffset = arraySym.getOffset() + i * elementSize;
-
             TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
-            instr.setResult(varName + "[" + elemOffset + "]");
+            instr.setResult(varName + "[" + i + "]");
             instr.setArg1(val);
             generator.addInstruction(instr);
         }
 
         return varName;
+    }
+
+    private String getAssignedVariable(ParseTree ctx) {
+        ParseTree parent = ctx.getParent();
+        while (parent != null) {
+            if (parent instanceof CompiscriptParser.VariableDeclarationContext) {
+                return ((CompiscriptParser.VariableDeclarationContext) parent).Identifier().getText();
+            } else if (parent instanceof CompiscriptParser.AssignmentContext) {
+                return ((CompiscriptParser.AssignmentContext) parent).Identifier().getText();
+            }
+            parent = parent.getParent();
+        }
+        return null; // no se encontró
     }
 
 
@@ -510,11 +532,12 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
         String rhs = visit(ctx.assignmentExpr()); // recursivo para rhs
 
-        // Generar TAC
-        TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
-        instr.setResult(lhs);
-        instr.setArg1(rhs);
-        generator.addInstruction(instr);
+        if (rhs != null) {
+            TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+            instr.setResult(lhs);
+            instr.setArg1(rhs);
+            generator.addInstruction(instr);
+        }
 
         return lhs; // devuelve el nombre de la variable asignada
     }

@@ -165,5 +165,51 @@ public class P4Tests {
         assertEquals(expected, testInit.generateTAC(code));
     }
 
+    @Test
+    void testArrayLiteralAssignment() {
+        String code = "let numbers: integer[] = [1, 2, 3, 4, 5];";
+
+        // Esto es lo que esperamos que genere el TAC según tu visitArrayLiteral
+        List<String> expected = Arrays.asList(
+                "t1 = 1",
+                "numbers[0] = t1",
+                "t2 = 2",
+                "numbers[1] = t2",
+                "t3 = 3",
+                "numbers[2] = t3",
+                "t4 = 4",
+                "numbers[3] = t4",
+                "t5 = 5",
+                "numbers[4] = t5"
+        );
+
+        List<String> actual = testInit.generateTAC(code); // tu método para generar TAC
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testHandleArrayAccess() {
+        String code = "let numbers: integer[] = [1, 2, 3]; let x = numbers[1];";
+
+        List<String> expected = Arrays.asList(
+                "t1 = 1",
+                "numbers[0] = t1",
+                "t2 = 2",
+                "numbers[1] = t2",
+                "t3 = 3",
+                "numbers[2] = t3",
+                "t4 = 1",
+                "t5 = numbers[t4]", // temporal que captura numbers[1]
+                "x = t5"
+        );
+
+        List<String> actual = testInit.generateTAC(code);
+
+        assertEquals(expected, actual);
+    }
+
+
+
 
 }
