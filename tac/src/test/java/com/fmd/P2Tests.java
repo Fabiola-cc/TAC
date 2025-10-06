@@ -280,4 +280,43 @@ public class P2Tests {
         assertEquals(expected, testInit.generateTAC(code));
     }
 
+    @Test
+    void testMultipleBlocks() {
+        String code = "var a = 1; var b = 2;if (a < b) { print(a);} else { print(b);} while (a < 3) {a = a + 1;if (a == 2) { print(a);}}";
+
+        List<String> expected = Arrays.asList(
+                "t1 = 1",
+                "a = t1",
+                "t2 = 2",
+                "b = t2",
+                "t3 = a < b",
+                "if t3 == 0 goto L1",
+                "t4 = a",
+                "call print(t4)",
+                "goto L2",
+                "L1:",
+                "t5 = b",
+                "call print(t5)",
+                "L2:",
+                "L3:",
+                "t6 = 3",
+                "t7 = a < t6",
+                "if t7 == 0 goto L4",
+                "t8 = 1",
+                "t9 = a + t8",
+                "a = t9",
+                "t10 = 2",
+                "t11 = a == t10",
+                "if t11 == 0 goto L5",
+                "t12 = a",
+                "call print(t12)",
+                "L5:",
+                "goto L3",
+                "L4:"
+        );
+
+        assertEquals(expected, testInit.generateTAC(code));
+    }
+
+
 }

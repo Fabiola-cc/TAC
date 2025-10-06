@@ -162,18 +162,25 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitPrintStatement(CompiscriptParser.PrintStatementContext ctx) {
-        // 1. Evaluar la expresión a imprimir
-        // 2. Generar instrucción CALL print
-
+        // Evaluar la expresión a imprimir y guardar en un temporal
         String value = exprVisitor.visit(ctx.expression());
+        String temp = generator.newTemp();
 
-        TACInstruction instr = new TACInstruction(TACInstruction.OpType.CALL);
-        instr.setArg1("print");
-        instr.addParam(value);
-        generator.addInstruction(instr);
+        // Asignar el valor de la expresión al temporal
+        TACInstruction assignInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+        assignInstr.setResult(temp);
+        assignInstr.setArg1(value);
+        generator.addInstruction(assignInstr);
+
+        // Generar instrucción CALL print usando el temporal
+        TACInstruction printInstr = new TACInstruction(TACInstruction.OpType.CALL);
+        printInstr.setArg1("print");
+        printInstr.addParam(temp);
+        generator.addInstruction(printInstr);
 
         return null;
     }
+
 
     /**
      * Expression statement:
