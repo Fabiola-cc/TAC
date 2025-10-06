@@ -18,7 +18,7 @@ public class Main {
         String inputFile = args.length > 0 ? args[0] : "src\\main\\java\\com\\fmd\\program.cps";
         String code = Files.readString(Path.of(inputFile));
 
-        System.out.println("=== CÓDIGO FUENTE ===");
+        System.out.println(" CÓDIGO FUENTE ");
         System.out.println(code);
         System.out.println();
 
@@ -33,7 +33,7 @@ public class Main {
         ParseTree tree = parser.program();
 
         // 5. Análisis semántico
-        System.out.println("\n=== ANÁLISIS SEMÁNTICO ===\n");
+        System.out.println("\n ANÁLISIS SEMÁNTICO \n");
         SemanticVisitor visitor = new SemanticVisitor();
         visitor.visit(tree);
 
@@ -48,20 +48,14 @@ public class Main {
             System.out.println("¡¡¡ No se puede continuar con el TAC !!!");
             return;
         }
-
-        System.out.println("\n=== TABLA DE SÍMBOLOS (SEMÁNTICO) ===\n");
-        visitor.getRaiz().getAllScopesSymbols().forEach((name, sym) -> {
-            System.out.println(sym.toString()); // o sym.toStringTAC()
-        });
-
         System.out.println("✓ No hay errores semánticos");
 
         // 7. Generar TAC
-        System.out.println("\n=== GENERACIÓN DE TAC ===\n");
+        System.out.println("\n GENERACIÓN DE TAC \n");
         TACVisitor visitor_tac = new TACVisitor(visitor.getExistingScopes());
         visitor_tac.visit(tree);
 
-        System.out.println("\n=== TABLA DE SÍMBOLOS ACTUALIZADA ===\n");
+        System.out.println("\n TABLA DE SÍMBOLOS ACTUALIZADA \n");
         visitor_tac.printTable();
     }
 }

@@ -30,6 +30,7 @@ public class TACGenerator {
     // Contexto actual (para funciones, clases, etc.)
     private String currentFunction;        // Nombre de la función actual
     private String currentClass;           // Nombre de la clase actual
+    private Boolean isAssignment;
 
     // Tabla de simbolos
     private Map<String, SemanticVisitor.Entorno> scopeTable = new LinkedHashMap<>();
@@ -48,6 +49,7 @@ public class TACGenerator {
         this.currentScopeLine = "0";
         this.scopeTable = scopeTable;
         this.offsetStack = new Stack<>();
+        this.isAssignment = false;
     }
 
     // MÉTODOS BÁSICOS
@@ -274,5 +276,13 @@ public class TACGenerator {
 
     public void setCurrentScopeLine(String currentScopeLine) {
         this.currentScopeLine = currentScopeLine;
+    }
+
+    public Boolean getAssignment() {
+        return isAssignment;
+    }
+
+    public void setAssignment(Boolean assignment) {
+        isAssignment = assignment;
     }
 }

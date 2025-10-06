@@ -2,6 +2,7 @@ package com.fmd;
 
 import com.fmd.modules.Symbol;
 import com.fmd.modules.TACInstruction;
+import org.springframework.expression.spel.ast.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +85,7 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
      */
     @Override
     public Void visitReturnStatement(CompiscriptParser.ReturnStatementContext ctx) {
+        generator.setAssignment(true);
         TACInstruction returnInstruction = new TACInstruction(TACInstruction.OpType.RETURN);
 
         // Si hay expresión, evaluarla
@@ -96,13 +98,7 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
         }
 
         generator.addInstruction(returnInstruction);
-
-        return null;
-    }
-
-    @Override
-    public Void visitCallExpr(CompiscriptParser.CallExprContext ctx) {
-
+        generator.setAssignment(false);
         return null;
     }
 }

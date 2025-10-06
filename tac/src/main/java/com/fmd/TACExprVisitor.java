@@ -309,6 +309,15 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
     private String handleFunctionCall(CompiscriptParser.CallExprContext ctx, String funcName) {
         TACInstruction callInstruction = new TACInstruction(TACInstruction.OpType.CALL);
+        String result = null;
+
+        // Si la llamada es para asignación
+        if( generator.getAssignment() ){
+            callInstruction = new TACInstruction(TACInstruction.OpType.ASSIGN_CALL);
+            result = generator.newTemp();
+            callInstruction.setResult(result);
+        }
+
         callInstruction.setArg1(funcName);
 
         if (ctx.arguments() != null) {
@@ -325,8 +334,9 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
                 callInstruction.addParam(tempName); // guardarla como parametro
             }
         }
+
         generator.addInstruction(callInstruction);
-        return null;
+        return result;
     }
 
     private String handleArrayAccess(CompiscriptParser.IndexExprContext ctx, String arrayName) {
@@ -527,6 +537,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
     @Override
     public String visitAssignExpr(CompiscriptParser.AssignExprContext ctx) {
+        generator.setAssignment(true);
         // ctx.lhs = lhs, ctx.assignmentExpr() = rhs
         String lhs = ctx.lhs.getText();
 
@@ -539,6 +550,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
             generator.addInstruction(instr);
         }
 
+        generator.setAssignment(false);
         return lhs; // devuelve el nombre de la variable asignada
     }
 

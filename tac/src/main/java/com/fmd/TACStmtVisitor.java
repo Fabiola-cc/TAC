@@ -127,7 +127,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         //    a. Evaluar objeto
         //    b. Evaluar expresión
         //    c. Generar instrucción de asignación a propiedad
-
+        generator.setAssignment(true);
         if (ctx.Identifier() != null && ctx.expression().size() == 1) {
             // Asignación simple: x = expression
             String varName = ctx.Identifier().getText();
@@ -148,10 +148,10 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
             instr.setResult(result);
             instr.setArg1(rhs);
             generator.addInstruction(instr);
-
+            generator.setAssignment(false);
             return null;
         }
-
+        generator.setAssignment(false);
         return null;
     }
 
@@ -479,8 +479,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
     // FUNCIONES
     @Override
     public Void visitFunctionDeclaration(CompiscriptParser.FunctionDeclarationContext ctx) {
-        funcsVisitor.visit(ctx);
-        return null;
+        return funcsVisitor.visit(ctx);
     }
 
     @Override

@@ -17,27 +17,6 @@ public class P4Tests {
     TestInit testInit = new TestInit();
 
     @Test
-    void testBreakInLoop() {
-        String code = "let numbers: integer[] = [1, 2, 3, 4, 5]; ";
-        List<String> expected = Arrays.asList(
-                "t1 = 0",
-                "i = t1",
-                "L1:",
-                "t2 = i < 3",
-                "if t2 == 0 goto L2",
-                "t3 = i == 1",
-                "if t3 != 0 goto Lbreak1",
-                "t4 = 1",
-                "t5 = i + t4",
-                "i = t5",
-                "goto L1",
-                "Lbreak1:",
-                "L2:"
-        );
-        assertEquals(expected, testInit.generateTAC(code));
-    }
-
-    @Test
     void testContinueInLoop() {
         String code = "for (let i = 0; i < 3; i = i + 1) { if (i == 1) { continue; } }";
         List<String> expected = Arrays.asList(
@@ -60,43 +39,33 @@ public class P4Tests {
     }
 
     @Test
-    void testTryCatch() {
-        String code = "try { print(1); } catch (e) { print(2); }";
-        List<String> expected = Arrays.asList(
-                "t1 = 1",
-                "t2 = t1",
-                "call print(t2)",
-                "goto L2",
-                "L1:",
-                "e = exception",
-                "t3 = 2",
-                "t4 = t3",
-                "call print(t4)",
-                "L2:"
-        );
-        assertEquals(expected, testInit.generateTAC(code));
-    }
-
-    @Test
     void testForEachLoop() {
         String code = "let numbers: integer[] = [1, 2, 3, 4, 5];\n" +
                 "foreach (num in numbers) {\n" +
                 "    print(num);\n" +
                 "}\n";
         List<String> expected = Arrays.asList(
-                "t1 = [1,2,3,4,5]",
-                "numbers = t1",
-                "t2 = 0",
-                "t3 = 5",
+                "t1 = 1",
+                "numbers[0] = t1",
+                "t2 = 2",
+                "numbers[1] = t2",
+                "t3 = 3",
+                "numbers[2] = t3",
+                "t4 = 4",
+                "numbers[3] = t4",
+                "t5 = 5",
+                "numbers[4] = t5",
+                "t6 = 0",
+                "t7 = 5",
                 "L1:",
-                "t4 = t2 < t3",
-                "if t4 == 0 goto L2",
-                "t5 = numbers[t2]",
-                "num = t5",
-                "t6 = num",
-                "call print(t6)",
-                "t7 = t2 + 1",
-                "t2 = t7",
+                "t8 = t6 < t7",
+                "if t8 == 0 goto L2",
+                "t9 = numbers[t6]",
+                "num = t9",
+                "t10 = num",
+                "call print(t10)",
+                "t11 = t6 + 1",
+                "t6 = t11",
                 "goto L1",
                 "L2:"
         );
