@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TestInit {
+    public TACVisitor visitor_tac;
     public List<String> generateTAC(String code) {
         // Lexer y parser
         CompiscriptLexer lexer = new CompiscriptLexer(CharStreams.fromString(code));
@@ -20,7 +21,7 @@ public class TestInit {
         visitor.visit(tree);
 
         // Generación TAC
-        TACVisitor visitor_tac = new TACVisitor(visitor.getExistingScopes());
+        visitor_tac = new TACVisitor(visitor.getExistingScopes());
         visitor_tac.visit(tree);
 
         // Retornar TAC como lista de strings

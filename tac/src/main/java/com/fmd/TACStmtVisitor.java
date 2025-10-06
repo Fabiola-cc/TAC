@@ -48,7 +48,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      * @param type string
      * @return offset int
      */
-    private int typeSize(String type) {
+    public int typeSize(String type) {
         if (type == null) {
             return 4; // default (ej: unknown → int)
         }
