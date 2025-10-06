@@ -58,7 +58,8 @@ public class P1Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 10",
                 "x = t1",
-                "call print(x)"
+                "t2 = x",
+                "call print(t2)"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
