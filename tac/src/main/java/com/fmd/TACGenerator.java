@@ -35,6 +35,7 @@ public class TACGenerator {
     private Map<String, SemanticVisitor.Entorno> scopeTable = new LinkedHashMap<>();
     private String currentScopeLine;        // Id del scope actual
     private int currentOffset = 0;
+    private Stack<Integer> offsetStack; // para recordar offsets de cada scope
 
     public TACGenerator(Map<String, SemanticVisitor.Entorno> scopeTable) {
         this.instructions = new ArrayList<>();
@@ -46,6 +47,7 @@ public class TACGenerator {
         this.currentClass = null;
         this.currentScopeLine = "0";
         this.scopeTable = scopeTable;
+        this.offsetStack = new Stack<>();
     }
 
     // MÉTODOS BÁSICOS
@@ -161,6 +163,8 @@ public class TACGenerator {
      * @param functionName Nombre de la función
      */
     public void enterFunction(String functionName) {
+        offsetStack.push(currentOffset);
+        currentOffset = 0;
         this.currentFunction = functionName;
     }
 
@@ -169,6 +173,7 @@ public class TACGenerator {
      */
     public void exitFunction() {
         this.currentFunction = null;
+        currentOffset += offsetStack.pop();
     }
 
     /**
@@ -186,6 +191,8 @@ public class TACGenerator {
      * @param className Nombre de la clase
      */
     public void enterClass(String className) {
+        offsetStack.push(currentOffset);
+        currentOffset = 0;
         this.currentClass = className;
     }
 
@@ -194,6 +201,7 @@ public class TACGenerator {
      */
     public void exitClass() {
         this.currentClass = null;
+        currentOffset += offsetStack.pop();
     }
 
     /**
@@ -239,12 +247,16 @@ public class TACGenerator {
         return null; // No existe ni afuera ni dentro del scope actual
     }
 
+    public Map<String, Symbol> getSymbolTable(String line) {
+        return scopeTable.get(line).getSymbolsLocal();
+    }
+
     /** imprime recursivamente los símbolos por scope */
     public void imprimirSimbolos() {
         System.out.println("===== TABLAS DE SÍMBOLOS POR SCOPE =====");
         for (Map.Entry<String, SemanticVisitor.Entorno> entry : scopeTable.entrySet()) {
             SemanticVisitor.Entorno entorno = entry.getValue();
-            Map<String, Symbol> locals = entorno.getSymbolsLocal(); // 👈 usa el local
+            Map<String, Symbol> locals = entorno.getSymbolsLocal(); // usa el local
 
             System.out.println("Scope (" + locals.size() + " symbols)");
             for (Symbol sym : locals.values()) {

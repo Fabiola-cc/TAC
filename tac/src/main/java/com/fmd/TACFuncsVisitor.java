@@ -5,6 +5,7 @@ import com.fmd.modules.TACInstruction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
     private final TACGenerator generator;
@@ -26,6 +27,7 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
      */
     @Override
     public Void visitFunctionDeclaration(CompiscriptParser.FunctionDeclarationContext ctx) {
+
         String funcName = ctx.Identifier().getText();
         Symbol funcSym = generator.getSymbol(funcName);
 
@@ -33,11 +35,17 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
         int paramCount = ctx.parameters() != null ? ctx.parameters().parameter().size() : 0;
         funcSym.setParamCount(paramCount);
 
-        // Reservar espacio para locales (inicialmente 0, se va sumando al declarar variables)
-        funcSym.setLocalVarSize(0);
-
         // Marcar inicio de función, para acceso a scope
+        String thisScopeLine = String.valueOf(ctx.block().start.getLine());
         generator.enterFunction(funcName);
+        generator.setCurrentScopeLine(thisScopeLine);
+
+        if (paramCount > 0) {
+            for (CompiscriptParser.ParameterContext param : ctx.parameters().parameter()) {
+                Symbol paramSym = generator.getSymbol(param.Identifier().getText());
+                paramSym.setOffset(generator.allocateLocal(stmtVisitor.typeSize(paramSym.getType())));
+            }
+        }
 
         // Generar etiqueta func_name:
         TACInstruction funcInstruction = new TACInstruction(TACInstruction.OpType.LABEL);
@@ -46,6 +54,15 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
 
         // Procesar cuerpo de la función (incluyendo return)
         stmtVisitor.visit(ctx.block());
+
+        // Reservar espacio para locales
+        int varSize = 0;
+        Map<String, Symbol> members = generator.getSymbolTable(thisScopeLine);
+        funcSym.setMembers(members); // actualizar miembros de funcion
+        for (Symbol member : members.values()) {
+            varSize += member.getOffset();
+        }
+        funcSym.setLocalVarSize(varSize);
 
         // etiqueta de fin
         TACInstruction funcEndInstruction = new TACInstruction(TACInstruction.OpType.END);

@@ -66,7 +66,7 @@ public class OffsetTests {
 
         assertEquals(0, x.getOffset());
         assertEquals(4, y.getOffset());
-        assertEquals(0, z.getOffset(), "z empieza en 0 dentro del bloque anidado");
+        assertEquals(8, z.getOffset());
     }
 
     @Test
@@ -92,6 +92,35 @@ public class OffsetTests {
         assertEquals(0, a.getOffset());
         assertEquals(4, b.getOffset());
         assertEquals(8, temp.getOffset());
+    }
+
+    @Test
+    void testOffsets_BlockWithFunction() {
+        String code = """
+    {
+        let x: integer = 1;
+        function bar() {
+            let y: integer = 2;
+            let z: integer = 3;
+        }
+    }
+    """;
+
+        testInit.generateTAC(code);
+        TACGenerator generator = testInit.visitor_tac.getGenerator();
+
+        // Variables del bloque
+        generator.setCurrentScopeLine("1");
+        Symbol x = generator.getSymbol("x");
+
+        // Variables dentro de la función
+        generator.setCurrentScopeLine("3");
+        Symbol y = generator.getSymbol("y");
+        Symbol z = generator.getSymbol("z");
+
+        assertEquals(0, x.getOffset(), "Variable del bloque externo");
+        assertEquals(0, y.getOffset(), "Inicio de nuevo frame (función)");
+        assertEquals(4, z.getOffset(), "Segundo símbolo en la función");
     }
 
 
