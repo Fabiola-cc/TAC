@@ -57,7 +57,28 @@ public class P2Tests {
         assertEquals(expected, testInit.generateTAC(code));
     }
 
-
+    @Test
+    void testLogicalCombination() {
+        String code = "let a = 1; let b = 2; if (a < b && b < 5){ print(1);}";
+        List<String> expected = Arrays.asList(
+                "t1 = 1",
+                "a = t1",
+                "t2 = 2",
+                "b = t2",
+                "t4 = a < b",
+                "t3 = 0",
+                "if t4 == 0 goto L1",
+                "t5 = 5",
+                "t6 = b < t5",
+                "t3 = t6",
+                "L1:",
+                "if t3 == 0 goto L2",
+                "t7 = 1",
+                "call print(t7)",
+                "L2:"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
 
     @Test
     void testIfStatement() {
@@ -134,4 +155,129 @@ public class P2Tests {
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
+
+    @Test
+    void testIfWithoutElse() {
+        String code = "if (1 < 2) { print(100); }";
+        List<String> expected = Arrays.asList(
+                "t1 = 1",
+                "t2 = 2",
+                "t3 = t1 < t2",
+                "if t3 == 0 goto L1",
+                "t4 = 100",
+                "call print(t4)",
+                "L1:"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
+
+    @Test
+    void testNestedIfElse() {
+        String code = "if (true) { if (false) { print(0);} else { print(1); }}";
+        List<String> expected = Arrays.asList(
+                "t1 = 1",
+                "if t1 == 0 goto L1",
+                "t2 = 0",
+                "if t2 == 0 goto L3",
+                "t3 = 0",
+                "call print(t3)",
+                "goto L4",
+                "L3:",
+                "t4 = 1",
+                "call print(t4)",
+                "L4:",
+                "L1:"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
+
+    @Test
+    void testForWithoutInitOrUpdate() {
+        String code = "var i = 0; for (; i < 2;) { print(i); i = i + 1; }";
+        List<String> expected = Arrays.asList(
+                "t1 = 0",
+                "i = t1",
+                "L1:",
+                "t2 = 2",
+                "t3 = i < t2",
+                "if t3 == 0 goto L2",
+                "call print(i)",
+                "t4 = 1",
+                "t5 = i + t4",
+                "i = t5",
+                "goto L1",
+                "L2:"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
+
+    @Test
+    void testNestedBlocks() {
+        String code = "{ var a = 1; { var b = 2; print(a + b); } }";
+        List<String> expected = Arrays.asList(
+                "t1 = 1",
+                "a = t1",
+                "t2 = 2",
+                "b = t2",
+                "t3 = a + b",
+                "call print(t3)"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
+
+    @Test
+    void testWhileLogicalCondition() {
+        String code = "var a = 0; var b = 1; while (a < 3 && b < 5) { a = a + 1; }";
+        List<String> expected = Arrays.asList(
+                "t1 = 0",
+                "a = t1",
+                "t2 = 1",
+                "b = t2",
+                "L1:",
+                "t4 = 3",
+                "t5 = a < t4",
+                "t3 = 0",
+                "if t5 == 0 goto L3",
+                "t6 = 5",
+                "t7 = b < t6",
+                "t3 = t7",
+                "L3:",
+                "if t3 == 0 goto L2",
+                "t8 = 1",
+                "t9 = a + t8",
+                "a = t9",
+                "goto L1",
+                "L2:"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
+
+    @Test
+    void testNestedDoWhile() {
+        String code = "var i = 0; do { var j = 0; do { j = j + 1; } while (j < 2); i = i + 1; } while (i < 2);";
+        List<String> expected = Arrays.asList(
+                "t1 = 0",
+                "i = t1",
+                "L1:",
+                "t2 = 0",
+                "j = t2",
+                "L3:",
+                "t3 = 1",
+                "t4 = j + t3",
+                "j = t4",
+                "t5 = 2",
+                "t6 = j < t5",
+                "if t6 != 0 goto L3",
+                "L4:",
+                "t7 = 1",
+                "t8 = i + t7",
+                "i = t8",
+                "t9 = 2",
+                "t10 = i < t9",
+                "if t10 != 0 goto L1",
+                "L2:"
+        );
+        assertEquals(expected, testInit.generateTAC(code));
+    }
+
 }

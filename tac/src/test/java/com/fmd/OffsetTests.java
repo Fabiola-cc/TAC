@@ -123,5 +123,74 @@ public class OffsetTests {
         assertEquals(4, z.getOffset(), "Segundo símbolo en la función");
     }
 
+    @Test
+    @DisplayName("Offsets dentro de una clase")
+    void testOffsets_ClassScope() {
+        String code = """
+        class Point {
+            let x: integer = 10;
+            let y: integer = 20;
+            
+            function move() {
+                let dx: integer = 1;
+                let dy: integer = 2;
+            }
+        }
+    """;
+
+        testInit.generateTAC(code);
+        TACGenerator generator = testInit.visitor_tac.getGenerator();
+
+        // Campos de clase
+        generator.setCurrentScopeLine("1");
+        Symbol point = generator.getSymbol("Point");
+        Symbol x = point.getMembers().get("x");
+        Symbol y = point.getMembers().get("y");
+
+        // Variables dentro del metodo
+        Symbol move = point.getMembers().get("move");
+        Symbol dx = move.getMembers().get("dx");
+        Symbol dy = move.getMembers().get("dy");
+
+        assertEquals(0, x.getOffset(), "Primer campo de clase");
+        assertEquals(4, y.getOffset(), "Segundo campo de clase");
+        assertEquals(0, dx.getOffset(), "Primer variable del método (nuevo frame)");
+        assertEquals(4, dy.getOffset(), "Segundo variable del método");
+    }
+
+    @Test
+    @DisplayName("Offsets dentro de estructuras de control")
+    void testOffsets_ControlStructures() {
+        String code = """
+        function demo() {
+            let a: integer = 1;
+            if (a > 0) {
+                let b: integer = 2;
+            }
+            for (let i: integer = 0; i < 3; i = i + 1) {
+                let c: integer = 3;
+            }
+        }
+    """;
+
+        testInit.generateTAC(code);
+        TACGenerator generator = testInit.visitor_tac.getGenerator();
+
+        generator.setCurrentScopeLine("1");
+        Symbol func = generator.getSymbol("demo");
+        Symbol a = func.getMembers().get("a");
+
+        generator.setCurrentScopeLine("3");
+        Symbol b = generator.getSymbol("b");
+
+        generator.setCurrentScopeLine("6");
+        Symbol i = generator.getSymbol("i");
+        Symbol c = generator.getSymbol("c");
+
+        assertEquals(0, a.getOffset(), "Primera variable local");
+        assertEquals(4, b.getOffset(), "No se reinicia dentro de if");
+        assertEquals(8, i.getOffset(), "For no reinicia offset");
+        assertEquals(12, c.getOffset(), "Tampoco reinicia dentro del for");
+    }
 
 }
