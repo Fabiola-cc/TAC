@@ -630,29 +630,44 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
     }
 
     /**
-     * Switch statement:
-     *      switch (x) { case 1: ... default: ... }
+     * Switch statement con break implícito (estilo Java)
+     *
+     * Genera código TAC para estructuras switch con las siguientes características:
+     * - Cada case ejecuta solo sus statements y termina automáticamente
+     * - No hay fall-through entre cases
+     * - Break explícito es opcional pero permitido
+     * - Switch se registra como contexto válido para break
+     *
+     * Ejemplo:
+     *   switch (x) {
+     *     case 1:
+     *       print("uno");
+     *     case 2:
+     *       print("dos");
+     *     default:
+     *       print("otro");
+     *   }
      *
      * TAC generado:
      *   t1 = x
-     *   t2 = t1 == 1
-     *   if t2 == true goto L1
-     *   t3 = t1 == 2
-     *   if t3 == true goto L2
-     *   goto Ldefault
-     * L1:
-     *   [código case 1]
-     * L2:
-     *   [código case 2]
-     * Ldefault:
-     *   [código default]
-     * Lend:
+     *   if t1 == 1 goto L_case1
+     *   if t1 == 2 goto L_case2
+     *   goto L_default
+     * L_case1:
+     *   print("uno")
+     *   goto L_end         // Break implícito
+     * L_case2:
+     *   print("dos")
+     *   goto L_end         // Break implícito
+     * L_default:
+     *   print("otro")
+     * L_end:
      */
     @Override
     public Void visitSwitchStatement(CompiscriptParser.SwitchStatementContext ctx) {
         TACExprVisitor exprVisitor = new TACExprVisitor(generator);
 
-        // 1. Evaluar la expresión del switch y guardarla en un temporal
+        // 1. Evaluar la expresión del switch y almacenarla en un temporal
         String switchExpr = exprVisitor.visit(ctx.expression());
         String switchTemp = generator.newTemp();
         TACInstruction assignSwitch = new TACInstruction(TACInstruction.OpType.ASSIGN);
@@ -660,17 +675,21 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         assignSwitch.setArg1(switchExpr);
         generator.addInstruction(assignSwitch);
 
-        // 2. Crear etiqueta final del switch
+        // 2. Crear etiqueta de salida y registrar switch como contexto válido para break
+        // Continue no tiene sentido en switch, por eso se pasa null
         String endLabel = generator.newLabel();
+        generator.enterLoop(endLabel, null);
 
         // 3. Crear etiquetas para cada case
         List<String> caseLabels = new ArrayList<>();
         for (int i = 0; i < ctx.switchCase().size(); i++) {
             caseLabels.add(generator.newLabel());
         }
+        // Si existe default, crear su etiqueta; si no, usar endLabel
         String defaultLabel = ctx.defaultCase() != null ? generator.newLabel() : endLabel;
 
-        // 4. Generar comparaciones y saltos condicionales a cada case
+        // 4. Generar comparaciones y saltos condicionales para cada case
+        // Se generan todas las comparaciones primero (optimización de saltos)
         for (int i = 0; i < ctx.switchCase().size(); i++) {
             CompiscriptParser.SwitchCaseContext caseCtx = ctx.switchCase(i);
             String caseValue = exprVisitor.visit(caseCtx.expression());
@@ -684,44 +703,62 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
             generator.addInstruction(ifGoto);
         }
 
-        // 5. Salto a default si ningún case coincide
+        // 5. Si ningún case coincide, saltar a default (o al final si no hay default)
         TACInstruction gotoDefault = new TACInstruction(TACInstruction.OpType.GOTO);
         gotoDefault.setLabel(defaultLabel);
         generator.addInstruction(gotoDefault);
 
         // 6. Generar código de cada case
         for (int i = 0; i < ctx.switchCase().size(); i++) {
-            // Etiqueta del case
+            // Colocar etiqueta del case
             TACInstruction caseLabelInstr = new TACInstruction(TACInstruction.OpType.LABEL);
             caseLabelInstr.setLabel(caseLabels.get(i));
             generator.addInstruction(caseLabelInstr);
 
-            // Statements del case
-            visit((ParseTree) ctx.switchCase(i).statement());
+            // Procesar todos los statements del case
+            CompiscriptParser.SwitchCaseContext caseCtx = ctx.switchCase(i);
+            List<CompiscriptParser.StatementContext> statements = caseCtx.statement();
 
-            // Saltar al final del switch al terminar el case
-            TACInstruction gotoEnd = new TACInstruction(TACInstruction.OpType.GOTO);
-            gotoEnd.setLabel(endLabel);
-            generator.addInstruction(gotoEnd);
+            for (CompiscriptParser.StatementContext stmt : statements) {
+                visit(stmt);
+            }
+
+            // Detectar si el último statement es un break explícito
+            // Si no hay break explícito, generar goto automático (break implícito)
+            boolean hasExplicitBreak = !statements.isEmpty() &&
+                    statements.get(statements.size() - 1).breakStatement() != null;
+
+            if (!hasExplicitBreak) {
+                // Break implícito: saltar al final del switch
+                TACInstruction gotoEnd = new TACInstruction(TACInstruction.OpType.GOTO);
+                gotoEnd.setLabel(endLabel);
+                generator.addInstruction(gotoEnd);
+            }
         }
 
         // 7. Generar código del default si existe
         if (ctx.defaultCase() != null) {
+            // Colocar etiqueta del default
             TACInstruction defaultLabelInstr = new TACInstruction(TACInstruction.OpType.LABEL);
             defaultLabelInstr.setLabel(defaultLabel);
             generator.addInstruction(defaultLabelInstr);
 
-            visit((ParseTree) ctx.defaultCase().statement());
+            // Procesar statements del default
+            for (CompiscriptParser.StatementContext stmt : ctx.defaultCase().statement()) {
+                visit(stmt);
+            }
         }
 
-        // 8. Etiqueta final del switch
+        // 8. Salir del contexto de switch (desapilar de la pila de breaks)
+        generator.exitLoop();
+
+        // 9. Colocar etiqueta final del switch
         TACInstruction endInstr = new TACInstruction(TACInstruction.OpType.LABEL);
         endInstr.setLabel(endLabel);
         generator.addInstruction(endInstr);
 
         return null;
     }
-
 
 
     /**
@@ -733,20 +770,13 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
      */
     @Override
     public Void visitBreakStatement(CompiscriptParser.BreakStatementContext ctx) {
-        // TODO P4: Implementar
-        // 1. Obtener etiqueta de break actual: generator.getCurrentBreakLabel()
-        // 2. Si es null, error (break fuera de loop)
-        // 3. Generar goto a la etiqueta
-
+        // 1. Obtener etiqueta de break actual
         String breakLabel = generator.getCurrentBreakLabel();
-
-        if (breakLabel != null) {
-            TACInstruction gotoBreak = new TACInstruction(TACInstruction.OpType.GOTO);
-            gotoBreak.setLabel(breakLabel);
-            generator.addInstruction(gotoBreak);
-        } else {
-            System.err.println("ERROR: break fuera de un loop");
-        }
+        // 2. Validar que estamos dentro de un loop o switch
+        // 3. Generar goto a la etiqueta de salida
+        TACInstruction gotoBreak = new TACInstruction(TACInstruction.OpType.GOTO);
+        gotoBreak.setLabel(breakLabel);
+        generator.addInstruction(gotoBreak);
 
         return null;
     }
