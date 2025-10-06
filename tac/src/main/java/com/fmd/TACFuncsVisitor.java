@@ -44,7 +44,7 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
         if (paramCount > 0) {
             for (CompiscriptParser.ParameterContext param : ctx.parameters().parameter()) {
                 Symbol paramSym = generator.getSymbol(param.Identifier().getText());
-                paramSym.setOffset(generator.allocateLocal(stmtVisitor.typeSize(paramSym.getType())));
+                paramSym.setOffset(generator.allocateLocal(generator.typeSize(paramSym.getType())));
             }
         }
 

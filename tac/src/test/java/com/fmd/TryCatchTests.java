@@ -649,23 +649,22 @@ public class TryCatchTests {
                 "t1 = a / b",
                 "return t1",
                 "end divide",
-
                 "try_begin L1",
-                "t3 = 10",
-                "t2 = t3",
-                "t5 = 0",
-                "t4 = t5",
-                "call divide(t2, t4)",
-                "t6 = result",
-                "call print(t6)",
+                "t4 = 10",
+                "t3 = t4",
+                "t6 = 0",
+                "t5 = t6",
+                "t2 = call divide(t3, t5)",
+                "result = t2",
+                "t7 = result",
+                "call print(t7)",
                 "try_end",
                 "goto L2",
-
                 "L1:",
                 "e = exception",
-                "t7 = \"Error de división\"",
-                "t8 = t7",
-                "call print(t8)",
+                "t8 = \"Error de división\"",
+                "t9 = t8",
+                "call print(t9)",
                 "L2:"
         );
 
@@ -689,26 +688,23 @@ public class TryCatchTests {
 
         List<String> expected = Arrays.asList(
                 "safeDivide:",
-
                 "try_begin L1",
                 "t1 = a / b",
                 "return t1",
                 "try_end",
                 "goto L2",
-
                 "L1:",
                 "e = exception",
                 "t2 = 0",
                 "return t2",
                 "L2:",
-
                 "end safeDivide",
-
-                "t4 = 10",
-                "t3 = t4",
-                "t6 = 2",
-                "t5 = t6",
-                "call safeDivide(t3, t5)"
+                "t5 = 10",
+                "t4 = t5",
+                "t7 = 2",
+                "t6 = t7",
+                "t3 = call safeDivide(t4, t6)",
+                "x = t3"
         );
 
         assertEquals(expected, testInit.generateTAC(code));

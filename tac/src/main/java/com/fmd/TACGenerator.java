@@ -285,4 +285,30 @@ public class TACGenerator {
     public void setAssignment(Boolean assignment) {
         isAssignment = assignment;
     }
+
+    /**
+     * Permite reconocer el offset de cada variable según su tipo
+     * @param type string
+     * @return offset int
+     */
+    public int typeSize(String type) {
+        if (type == null) {
+            return 4; // default (ej: unknown → int)
+        }
+
+        switch (type) {
+            case "boolean":
+                return 1; // 1 byte
+            case "integer":
+                return 4; // 4 bytes
+            case "string":
+                return 8; // referencia a string en heap
+            default:
+                // para arrays, clases, etc.
+                if (type.endsWith("[]")) {
+                    return 8; // referencia a array
+                }
+                return 8; // por defecto: referencia/objeto
+        }
+    }
 }

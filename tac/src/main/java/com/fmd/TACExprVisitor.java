@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
@@ -375,16 +376,17 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         Symbol arraySym = generator.getSymbol(varName);
 
         // Tamaño por elemento (ejemplo: integer = 4 bytes)
-        int elementSize = 4;
+        int elementSize = generator.typeSize(arraySym.getType().replace("[]", ""));
         arraySym.setElementSize(elementSize);
 
         // Dimensiones del array
-        int length = ctx.expression().size();
-        arraySym.setDimensions(List.of(length));
+        List<Integer> dimensions = calculateDimensions(ctx);
+        arraySym.setDimensions(dimensions);
 
         // Calcular tamaño total del array en bytes
-        int pointerSize = 4; // espacio para puntero/base del array
-        int totalSize = pointerSize + length * elementSize;
+        int totalElements = dimensions.stream().reduce(1, (a, b) -> a * b);
+        int pointerSize = 4;
+        int totalSize = pointerSize + totalElements * elementSize;
         arraySym.setSize(totalSize);
 
         // Asignar offset en el frame, usando allocateLocal con tamaño total
@@ -394,16 +396,125 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         arraySym.setTacAddress(varName);
 
         // Generar TAC para cada elemento usando índice
-        for (int i = 0; i < length; i++) {
-            String val = visit(ctx.expression(i));
-
-            TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
-            instr.setResult(varName + "[" + i + "]");
-            instr.setArg1(val);
-            generator.addInstruction(instr);
-        }
+        List<Integer> currentIndex = new ArrayList<>(Collections.nCopies(dimensions.size(), 0));
+        generateMatrixAssignments(ctx, varName, currentIndex, 0);
 
         return varName;
+    }
+
+    /**
+     * Extrae el ArrayLiteralContext navegando la jerarquía de reglas
+     */
+    private CompiscriptParser.ArrayLiteralContext getArrayLiteral(
+            CompiscriptParser.ExpressionContext expr
+    ) {
+        // expression -> assignmentExpr
+        if (expr.assignmentExpr() == null) return null;
+
+        CompiscriptParser.AssignmentExprContext assignExpr = expr.assignmentExpr();
+
+        // assignmentExpr -> conditionalExpr (regla ExprNoAssign)
+        if (!(assignExpr instanceof CompiscriptParser.ExprNoAssignContext)) return null;
+
+        CompiscriptParser.ExprNoAssignContext noAssign =
+                (CompiscriptParser.ExprNoAssignContext) assignExpr;
+
+        // conditionalExpr -> TernaryExpr
+        CompiscriptParser.ConditionalExprContext condExpr = noAssign.conditionalExpr();
+        if (!(condExpr instanceof CompiscriptParser.TernaryExprContext)) return null;
+
+        CompiscriptParser.TernaryExprContext ternary =
+                (CompiscriptParser.TernaryExprContext) condExpr;
+
+        // logicalOrExpr -> logicalAndExpr -> ... -> primaryExpr
+        // Necesitamos navegar hasta primaryExpr
+        CompiscriptParser.LogicalOrExprContext logicalOr = ternary.logicalOrExpr();
+        if (logicalOr == null || logicalOr.logicalAndExpr().isEmpty()) return null;
+
+        CompiscriptParser.LogicalAndExprContext logicalAnd = logicalOr.logicalAndExpr(0);
+        if (logicalAnd == null || logicalAnd.equalityExpr().isEmpty()) return null;
+
+        CompiscriptParser.EqualityExprContext equality = logicalAnd.equalityExpr(0);
+        if (equality == null || equality.relationalExpr().isEmpty()) return null;
+
+        CompiscriptParser.RelationalExprContext relational = equality.relationalExpr(0);
+        if (relational == null || relational.additiveExpr().isEmpty()) return null;
+
+        CompiscriptParser.AdditiveExprContext additive = relational.additiveExpr(0);
+        if (additive == null || additive.multiplicativeExpr().isEmpty()) return null;
+
+        CompiscriptParser.MultiplicativeExprContext multiplicative = additive.multiplicativeExpr(0);
+        if (multiplicative == null || multiplicative.unaryExpr().isEmpty()) return null;
+
+        CompiscriptParser.UnaryExprContext unary = multiplicative.unaryExpr(0);
+        if (unary == null || unary.primaryExpr() == null) return null;
+
+        CompiscriptParser.PrimaryExprContext primary = unary.primaryExpr();
+        if (primary.literalExpr() == null) return null;
+
+        CompiscriptParser.LiteralExprContext literal = primary.literalExpr();
+        return literal.arrayLiteral();
+    }
+
+    /**
+     * Calcula las dimensiones de un array/matriz recursivamente
+     */
+    private List<Integer> calculateDimensions(CompiscriptParser.ArrayLiteralContext ctx) {
+        List<Integer> dims = new ArrayList<>();
+
+        // Primera dimensión: número de elementos en este nivel
+        int size = ctx.expression() != null ? ctx.expression().size() : 0;
+        dims.add(size);
+
+        // Si el primer elemento es también un array, obtener dimensiones internas
+        if (size > 0) {
+            CompiscriptParser.ArrayLiteralContext innerArray =
+                    getArrayLiteral(ctx.expression(0));
+
+            if (innerArray != null) {
+                dims.addAll(calculateDimensions(innerArray));
+            }
+        }
+
+        return dims;
+    }
+
+    /**
+     * Genera asignaciones TAC recursivamente para matrices
+     */
+    private void generateMatrixAssignments(
+            CompiscriptParser.ArrayLiteralContext ctx,
+            String varName,
+            List<Integer> currentIndex,
+            int depth
+    ) {
+        if (ctx.expression() == null) return;
+
+        for (int i = 0; i < ctx.expression().size(); i++) {
+            currentIndex.set(depth, i);
+
+            CompiscriptParser.ExpressionContext expr = ctx.expression(i);
+            CompiscriptParser.ArrayLiteralContext innerArray = getArrayLiteral(expr);
+
+            if (innerArray != null) {
+                // Es un sub-array, recursión
+                generateMatrixAssignments(innerArray, varName, currentIndex, depth + 1);
+            } else {
+                // Es un valor escalar, generar asignación
+                String val = visit(expr);
+
+                // Construir índice multidimensional: varName[i][j]...
+                StringBuilder indexStr = new StringBuilder(varName);
+                for (int j = 0; j <= depth; j++) {
+                    indexStr.append("[").append(currentIndex.get(j)).append("]");
+                }
+
+                TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+                instr.setResult(indexStr.toString());
+                instr.setArg1(val);
+                generator.addInstruction(instr);
+            }
+        }
     }
 
     private String getAssignedVariable(ParseTree ctx) {

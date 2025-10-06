@@ -44,32 +44,6 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
     // STATEMENTS BÁSICOS
     /**
-     * Permite reconocer el offset de cada variable según su tipo
-     * @param type string
-     * @return offset int
-     */
-    public int typeSize(String type) {
-        if (type == null) {
-            return 4; // default (ej: unknown → int)
-        }
-
-        switch (type) {
-            case "boolean":
-                return 1; // 1 byte
-            case "integer":
-                return 4; // 4 bytes
-            case "string":
-                return 8; // referencia a string en heap
-            default:
-                // para arrays, clases, etc.
-                if (type.endsWith("[]")) {
-                    return 8; // referencia a array
-                }
-                return 8; // por defecto: referencia/objeto
-        }
-    }
-
-    /**
      * Declaración de variable:
      *      let x: integer = 5;
      *
@@ -89,7 +63,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
         // Información para tabla de símbolos
         varSym.setTacAddress(varName);
-        varSym.setSize(typeSize(varSym.getType()));
+        varSym.setSize(generator.typeSize(varSym.getType()));
         varSym.setOffset(generator.allocateLocal(varSym.getSize()));
 
         // Generar instrucciones TAC si tiene inicializador
@@ -510,7 +484,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
         // Información para tabla de símbolos
         varSym.setTacAddress(varName); // en TAC usaremos el mismo nombre
-        varSym.setSize(typeSize(varSym.getType())); // ej: 4 para int, 8 para string
+        varSym.setSize(generator.typeSize(varSym.getType())); // ej: 4 para int, 8 para string
         varSym.setOffset(generator.allocateLocal(varSym.getSize()));
 
         // Evaluar la expresión (llamar a exprVisitor)
