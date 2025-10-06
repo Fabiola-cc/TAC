@@ -348,28 +348,47 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
     @Override
     public String visitArrayLiteral(CompiscriptParser.ArrayLiteralContext ctx) {
-        String temp = generator.newTemp();
+        //  Obtener nombre del array desde la variable declarada
+        String varName = ctx.getParent().getChild(1).getText(); // "let numbers = [...]"
+        Symbol arraySym = generator.getSymbol(varName);
 
-        // Crear arreglo vacío
-        TACInstruction init = new TACInstruction(TACInstruction.OpType.ASSIGN);
-        init.setResult(temp);
-        init.setArg1("[]"); // literal vacío
-        generator.addInstruction(init);
+        // Tamaño por elemento (ejemplo: integer = 4 bytes)
+        int elementSize = 4;
+        arraySym.setElementSize(elementSize);
 
-        // Agregar cada elemento
-        for (CompiscriptParser.ExpressionContext exprCtx : ctx.expression()) {
-            String val = visit(exprCtx);
+        // Dimensiones del array
+        int length = ctx.expression().size();
+        arraySym.setDimensions(List.of(length));
 
-            TACInstruction addInstr = new TACInstruction(TACInstruction.OpType.BINARY_OP);
-            addInstr.setResult(temp);   // mismo arreglo
-            addInstr.setArg1(temp);     // arreglo previo
-            addInstr.setArg2(val);      // nuevo elemento
-            addInstr.setOperator("[]+"); // operador ficticio de push
-            generator.addInstruction(addInstr);
+        // Calcular tamaño total del array en bytes
+        int pointerSize = 4; // espacio para puntero/base del array
+        int totalSize = pointerSize + length * elementSize;
+        arraySym.setSize(totalSize);
+
+        // Asignar offset en el frame, usando allocateLocal con tamaño total
+        arraySym.setOffset(generator.allocateLocal(arraySym.getSize()));
+
+        // Registrar TACAddress (mismo nombre de variable)
+        arraySym.setTacAddress(varName);
+
+        // Generar TAC para cada elemento usando índice
+        for (int i = 0; i < length; i++) {
+            String val = visit(ctx.expression(i));
+
+            // Offset real dentro del frame = offset base + i * elementSize
+            int elemOffset = arraySym.getOffset() + i * elementSize;
+
+            TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+            instr.setResult(varName + "[" + elemOffset + "]");
+            instr.setArg1(val);
+            generator.addInstruction(instr);
         }
 
-        return temp;
+        return varName;
     }
+
+
+
 
 
     /**
