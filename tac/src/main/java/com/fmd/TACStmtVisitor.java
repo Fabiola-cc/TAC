@@ -141,6 +141,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
     @Override
     public Void visitPrintStatement(CompiscriptParser.PrintStatementContext ctx) {
         // Evaluar la expresión a imprimir y guardar en un temporal
+        generator.setAssignment(true);
         String value = exprVisitor.visit(ctx.expression());
         String temp = generator.newTemp();
 
@@ -155,7 +156,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         printInstr.setArg1("print");
         printInstr.addParam(temp);
         generator.addInstruction(printInstr);
-
+        generator.setAssignment(false);
         return null;
     }
 
@@ -894,6 +895,11 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
                 visit(member.constantDeclaration());
             }
         }
+
+        // etiqueta de fin
+        TACInstruction classEndInstruction = new TACInstruction(TACInstruction.OpType.END);
+        classEndInstruction.setLabel(className);
+        generator.addInstruction(classEndInstruction);
 
         // Marcar fin de clase
         generator.exitClass();

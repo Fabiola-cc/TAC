@@ -242,11 +242,8 @@ public class TACGenerator {
      * */
     public Symbol getSymbol(String name) {
         SemanticVisitor.Entorno thisScope = scopeTable.get(currentScopeLine);
-        Map<String, Symbol> actualTable = thisScope.getAllSymbols();
-        if (actualTable.containsKey(name)) {
-            return actualTable.get(name);
-        }
-        return null; // No existe ni afuera ni dentro del scope actual
+
+        return thisScope.obtener(name);
     }
 
     public SemanticVisitor.Entorno getScope(String line) {

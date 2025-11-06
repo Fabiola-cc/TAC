@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
@@ -359,6 +360,13 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
     private String handlePropertyAccess(CompiscriptParser.PropertyAccessExprContext ctx, String objName) {
         String propertyName = ctx.getText();
+
+        // si es una función
+        String identifier = ctx.Identifier().getText();
+        Symbol symProperty = generator.getSymbol(identifier);
+        if (symProperty.getKind() == Symbol.Kind.FUNCTION) {
+            return (objName + propertyName);
+        }
 
         String result = generator.newTemp();
         TACInstruction instr = new TACInstruction(TACInstruction.OpType.ASSIGN);
