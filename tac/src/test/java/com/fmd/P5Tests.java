@@ -32,7 +32,8 @@ public class P5Tests {
                 "speak:",
                 "t2 = name",
                 "call print(t2)",
-                "end speak"
+                "end speak",
+                "end Animal"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -56,7 +57,8 @@ public class P5Tests {
                 "t3 = 1",
                 "t4 = t2 + t3",
                 "this.value = t4",
-                "end inc"
+                "end inc",
+                "end Counter"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }

@@ -363,9 +363,27 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
         // si es una función
         String identifier = ctx.Identifier().getText();
-        Symbol symProperty = generator.getSymbol(identifier);
-        if (symProperty.getKind() == Symbol.Kind.FUNCTION) {
-            return (objName + propertyName);
+        Symbol symObj = generator.getSymbol(objName);
+        Symbol symType = null;
+        Symbol symProperty = null;
+
+        if(objName.equals("this")){
+            symProperty = generator.getSymbol(propertyName);
+            if (symProperty != null && symProperty.getKind() == Symbol.Kind.FUNCTION) {
+                return (objName + propertyName);
+            }
+        }
+
+        if(!objName.equals("this")){
+            symType = generator.getSymbol(symObj.getType());
+        }
+
+        if (symType != null && symType.getKind() == Symbol.Kind.CLASS ) {
+            symProperty = symType.getMembers().get(identifier);
+
+            if (symProperty != null && symProperty.getKind() == Symbol.Kind.FUNCTION) {
+                return (objName + propertyName);
+            }
         }
 
         String result = generator.newTemp();
