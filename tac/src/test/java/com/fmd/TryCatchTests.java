@@ -1114,7 +1114,7 @@ public class TryCatchTests {
                 "MyClass:",
                 "t1 = 10",
                 "value = t1",
-                "end MyClass",
+                "end Class MyClass",
 
                 "try_begin L1",
                 "t2 = new MyClass()",
