@@ -897,7 +897,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         }
 
         // etiqueta de fin
-        TACInstruction classEndInstruction = new TACInstruction(TACInstruction.OpType.END);
+        TACInstruction classEndInstruction = new TACInstruction(TACInstruction.OpType.END_CLASS);
         classEndInstruction.setLabel(className);
         generator.addInstruction(classEndInstruction);
 
