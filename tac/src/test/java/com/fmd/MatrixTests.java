@@ -21,16 +21,16 @@ public class MatrixTests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "matrix[0][0] = t1",
-                "t2 = 2",
-                "matrix[0][1] = t2",
-                "t3 = 3",
-                "matrix[0][2] = t3",
-                "t4 = 4",
-                "matrix[1][0] = t4",
-                "t5 = 5",
-                "matrix[1][1] = t5",
-                "t6 = 6",
-                "matrix[1][2] = t6"
+                "t1 = 2",
+                "matrix[0][1] = t1",
+                "t1 = 3",
+                "matrix[0][2] = t1",
+                "t1 = 4",
+                "matrix[1][0] = t1",
+                "t1 = 5",
+                "matrix[1][1] = t1",
+                "t1 = 6",
+                "matrix[1][2] = t1"
         );
 
         assertEquals(expected, testInit.generateTAC(code));
@@ -47,28 +47,30 @@ public class MatrixTests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "matrix[0][0] = t1",
-                "t2 = 2",
-                "matrix[0][1] = t2",
-                "t3 = 3",
-                "matrix[0][2] = t3",
-                "t4 = 4",
-                "matrix[1][0] = t4",
-                "t5 = 5",
-                "matrix[1][1] = t5",
-                "t6 = 6",
-                "matrix[1][2] = t6",
-                "t7 = 0",
-                "t8 = matrix[t7]",
-                "t9 = 1",
-                "t10 = t8[t9]",
-                "t11 = t10",
-                "call print(t11)",
-                "t12 = 1",
-                "t13 = matrix[t12]",
-                "t14 = 2",
-                "t15 = t13[t14]",
-                "t16 = t15",
-                "call print(t16)"
+                "t1 = 2",
+                "matrix[0][1] = t1",
+                "t1 = 3",
+                "matrix[0][2] = t1",
+                "t1 = 4",
+                "matrix[1][0] = t1",
+                "t1 = 5",
+                "matrix[1][1] = t1",
+                "t1 = 6",
+                "matrix[1][2] = t1",
+
+                // print(matrix[0][1])
+                "t1 = 0",
+                "t2 = matrix[t1]",
+                "t1 = 1",
+                "t3 = t2[t1]",
+                "call print(t3)",
+
+                // print(matrix[1][2])
+                "t3 = 1",
+                "t1 = matrix[t3]",
+                "t3 = 2",
+                "t4 = t1[t3]",
+                "call print(t4)"
         );
 
         assertEquals(expected, testInit.generateTAC(code));
@@ -85,24 +87,27 @@ public class MatrixTests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "matrix[0][0] = t1",
-                "t2 = 2",
-                "matrix[0][1] = t2",
-                "t3 = 3",
-                "matrix[0][2] = t3",
-                "t4 = 4",
-                "matrix[1][0] = t4",
-                "t5 = 5",
-                "matrix[1][1] = t5",
-                "t6 = 6",
-                "matrix[1][2] = t6",
-                "t7 = 9",
-                "matrix[0][1] = t7",
-                "t8 = 0",
-                "t9 = matrix[t8]",
-                "t10 = 1",
-                "t11 = t9[t10]",
-                "t12 = t11",
-                "call print(t12)"
+                "t1 = 2",
+                "matrix[0][1] = t1",
+                "t1 = 3",
+                "matrix[0][2] = t1",
+                "t1 = 4",
+                "matrix[1][0] = t1",
+                "t1 = 5",
+                "matrix[1][1] = t1",
+                "t1 = 6",
+                "matrix[1][2] = t1",
+
+                // matrix[0][1] = 9
+                "t1 = 9",
+                "matrix[0][1] = t1",
+
+                // print(matrix[0][1])
+                "t1 = 0",
+                "t2 = matrix[t1]",
+                "t1 = 1",
+                "t3 = t2[t1]",
+                "call print(t3)"
         );
 
         assertEquals(expected, testInit.generateTAC(code));

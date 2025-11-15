@@ -12,9 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TryCatchTests {
     TestInit testInit = new TestInit();
 
-    // ========================================
     // TESTS BÁSICOS DE TRY-CATCH
-    // ========================================
 
     @Test
     @DisplayName("Try-catch básico con print")
@@ -28,15 +26,13 @@ public class TryCatchTests {
         List<String> expected = Arrays.asList(
                 "try_begin L1",
                 "t1 = 1",
-                "t2 = t1",           // Temporal extra generado
-                "call print(t2)",
+                "call print(t1)",
                 "try_end",
                 "goto L2",
                 "L1:",
                 "e = exception",
-                "t3 = 2",
-                "t4 = t3",           // Temporal extra generado
-                "call print(t4)",
+                "t1 = 2",
+                "call print(t1)",
                 "L2:"
         );
 
@@ -60,16 +56,16 @@ public class TryCatchTests {
                 "try_begin L1",
                 "t1 = 10",
                 "x = t1",
-                "t2 = x",
-                "call print(t2)",
+                "t1 = x",
+                "call print(t1)",
                 "try_end",
                 "goto L2",
                 "L1:",
                 "err = exception",
-                "t3 = 0",
-                "y = t3",
-                "t4 = y",
-                "call print(t4)",
+                "t1 = 0",
+                "y = t1",
+                "t1 = y",
+                "call print(t1)",
                 "L2:"
         );
 
@@ -94,19 +90,18 @@ public class TryCatchTests {
                 "try_begin L1",
                 "t1 = 10",
                 "a = t1",
-                "t2 = 5",
-                "b = t2",
-                "t3 = a + b",
-                "c = t3",
-                "t4 = c",
-                "call print(t4)",
+                "t1 = 5",
+                "b = t1",
+                "t1 = a + b",
+                "c = t1",
+                "t1 = c",
+                "call print(t1)",
                 "try_end",
                 "goto L2",
                 "L1:",
                 "e = exception",
-                "t5 = 0",
-                "t6 = t5",
-                "call print(t6)",
+                "t1 = 0",
+                "call print(t1)",
                 "L2:"
         );
 
@@ -130,30 +125,26 @@ public class TryCatchTests {
         List<String> expected = Arrays.asList(
                 "t1 = 10",
                 "x = t1",
-                "t2 = 0",
-                "y = t2",
+                "t1 = 0",
+                "y = t1",
                 "try_begin L1",
-                "t3 = x / y",
-                "result = t3",
-                "t4 = result",
-                "call print(t4)",
+                "t1 = x / y",
+                "result = t1",
+                "t1 = result",
+                "call print(t1)",
                 "try_end",
                 "goto L2",
                 "L1:",
                 "e = exception",
-                "t5 = \"Error de división\"",
-                "t6 = t5",
-                "call print(t6)",
+                "t1 = \"Error de división\"",
+                "call print(t1)",
                 "L2:"
         );
 
         assertEquals(expected, testInit.generateTAC(code));
     }
 
-    // ========================================
     // TESTS DE TRY-CATCH CON ARRAYS
-    // ========================================
-
     @Test
     @DisplayName("Try-catch con acceso a array")
     void testTryCatchWithArrayAccess() {
@@ -170,23 +161,22 @@ public class TryCatchTests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "arr[0] = t1",
-                "t2 = 2",
-                "arr[1] = t2",
-                "t3 = 3",
-                "arr[2] = t3",
+                "t1 = 2",
+                "arr[1] = t1",
+                "t1 = 3",
+                "arr[2] = t1",
                 "try_begin L1",
-                "t4 = 10",
-                "t5 = arr[t4]",
-                "elem = t5",
-                "t6 = elem",
-                "call print(t6)",
+                "t1 = 10",
+                "t2 = arr[t1]",
+                "elem = t2",
+                "t2 = elem",
+                "call print(t2)",
                 "try_end",
                 "goto L2",
                 "L1:",
                 "e = exception",
-                "t7 = \"Índice fuera de rango\"",
-                "t8 = t7",
-                "call print(t8)",
+                "t2 = \"Índice fuera de rango\"",
+                "call print(t2)",
                 "L2:"
         );
 
@@ -209,34 +199,29 @@ public class TryCatchTests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "numeros[0] = t1",
-                "t2 = 2",
-                "numeros[1] = t2",
-                "t3 = 3",
-                "numeros[2] = t3",
+                "t1 = 2",
+                "numeros[1] = t1",
+                "t1 = 3",
+                "numeros[2] = t1",
                 "try_begin L1",
-                "t4 = 100",
-                "numeros[0] = t4",
-                "t5 = 0",
-                "t6 = numeros[t5]",
-                "t7 = t6",
-                "call print(t7)",
+                "t1 = 100",
+                "numeros[0] = t1",
+                "t1 = 0",
+                "t2 = numeros[t1]",
+                "call print(t2)",
                 "try_end",
                 "goto L2",
                 "L1:",
                 "e = exception",
-                "t8 = \"Error\"",
-                "t9 = t8",
-                "call print(t9)",
+                "t2 = \"Error\"",
+                "call print(t2)",
                 "L2:"
         );
 
         assertEquals(expected, testInit.generateTAC(code));
     }
 
-    // ========================================
     // TESTS DE TRY-CATCH ANIDADOS
-    // ========================================
-
     @Test
     @DisplayName("Try-catch anidados")
     void testNestedTryCatch() {
@@ -257,34 +242,29 @@ public class TryCatchTests {
         List<String> expected = Arrays.asList(
                 "try_begin L1",
                 "t1 = 1",
-                "t2 = t1",
-                "call print(t2)",
+                "call print(t1)",
 
                 "try_begin L3",
-                "t3 = 2",
-                "t4 = t3",
-                "call print(t4)",
+                "t1 = 2",
+                "call print(t1)",
                 "try_end",
                 "goto L4",
 
                 "L3:",
                 "inner = exception",
-                "t5 = 3",
-                "t6 = t5",
-                "call print(t6)",
+                "t1 = 3",
+                "call print(t1)",
                 "L4:",
 
-                "t7 = 4",
-                "t8 = t7",
-                "call print(t8)",
+                "t1 = 4",
+                "call print(t1)",
                 "try_end",
                 "goto L2",
 
                 "L1:",
                 "outer = exception",
-                "t9 = 5",
-                "t10 = t9",
-                "call print(t10)",
+                "t1 = 5",
+                "call print(t1)",
                 "L2:"
         );
 
@@ -314,19 +294,18 @@ public class TryCatchTests {
                 "x = t1",
 
                 "try_begin L3",
-                "t2 = 0",
-                "t3 = x / t2",
-                "y = t3",
-                "t4 = y",
-                "call print(t4)",
+                "t1 = 0",
+                "t2 = x / t1",
+                "y = t2",
+                "t2 = y",
+                "call print(t2)",
                 "try_end",
                 "goto L4",
 
                 "L3:",
                 "e1 = exception",
-                "t5 = \"Error interno\"",
-                "t6 = t5",
-                "call print(t6)",
+                "t2 = \"Error interno\"",
+                "call print(t2)",
                 "L4:",
 
                 "try_end",
@@ -334,19 +313,15 @@ public class TryCatchTests {
 
                 "L1:",
                 "e2 = exception",
-                "t7 = \"Error externo\"",
-                "t8 = t7",
-                "call print(t8)",
+                "t2 = \"Error externo\"",
+                "call print(t2)",
                 "L2:"
         );
 
         assertEquals(expected, testInit.generateTAC(code));
     }
 
-    // ========================================
     // TESTS DE TRY-CATCH CON CONTROL DE FLUJO
-    // ========================================
-
     @Test
     @DisplayName("Try-catch con if-else dentro del try")
     void testTryCatchWithIfElse() {
@@ -367,25 +342,22 @@ public class TryCatchTests {
                 "try_begin L1",
                 "t1 = 10",
                 "x = t1",
-                "t2 = 5",
-                "t3 = x > t2",
-                "if t3 == 0 goto L3",
-                "t4 = 1",
-                "t5 = t4",
-                "call print(t5)",
+                "t1 = 5",
+                "t2 = x > t1",
+                "if t2 == 0 goto L3",
+                "t1 = 1",
+                "call print(t1)",
                 "goto L4",
                 "L3:",
-                "t6 = 0",
-                "t7 = t6",
-                "call print(t7)",
+                "t1 = 0",
+                "call print(t1)",
                 "L4:",
                 "try_end",
                 "goto L2",
                 "L1:",
                 "e = exception",
-                "t8 = \"Error\"",
-                "t9 = t8",
-                "call print(t9)",
+                "t2 = \"Error\"",
+                "call print(t2)",
                 "L2:"
         );
 
@@ -412,25 +384,24 @@ public class TryCatchTests {
                 "i = t1",
 
                 "L1:",
-                "t2 = 3",
-                "t3 = i < t2",
-                "if t3 == 0 goto L2",
+                "t1 = 3",
+                "t2 = i < t1",
+                "if t2 == 0 goto L2",
 
                 "try_begin L3",
-                "t4 = i",
-                "call print(t4)",
+                "t1 = i",
+                "call print(t1)",
                 "try_end",
                 "goto L4",
                 "L3:",
                 "e = exception",
-                "t5 = \"Error\"",
-                "t6 = t5",
-                "call print(t6)",
+                "t1 = \"Error\"",
+                "call print(t1)",
                 "L4:",
 
-                "t7 = 1",
-                "t8 = i + t7",
-                "i = t8",
+                "t1 = 1",
+                "t3 = i + t1",
+                "i = t3",
                 "goto L1",
 
                 "L2:"
@@ -460,15 +431,15 @@ public class TryCatchTests {
                 "i = t1",
 
                 "L3:",
-                "t2 = 3",
-                "t3 = i < t2",
-                "if t3 == 0 goto L4",
+                "t1 = 3",
+                "t2 = i < t1",
+                "if t2 == 0 goto L4",
 
-                "t4 = i",
-                "call print(t4)",
-                "t5 = 1",
-                "t6 = i + t5",
-                "i = t6",
+                "t1 = i",
+                "call print(t1)",
+                "t1 = 1",
+                "t3 = i + t1",
+                "i = t3",
                 "goto L3",
 
                 "L4:",
@@ -477,9 +448,8 @@ public class TryCatchTests {
 
                 "L1:",
                 "e = exception",
-                "t7 = \"Error\"",
-                "t8 = t7",
-                "call print(t8)",
+                "t2 = \"Error\"",
+                "call print(t2)",
                 "L2:"
         );
 
@@ -506,16 +476,16 @@ public class TryCatchTests {
                 "i = t1",
 
                 "L3:",
-                "t2 = 3",
-                "t3 = i < t2",
-                "if t3 == 0 goto L4",
+                "t1 = 3",
+                "t2 = i < t1",
+                "if t2 == 0 goto L4",
 
-                "t4 = i",
-                "call print(t4)",
+                "t1 = i",
+                "call print(t1)",
 
-                "t5 = 1",
-                "t6 = i + t5",
-                "i = t6",
+                "t1 = 1",
+                "t3 = i + t1",
+                "i = t3",
                 "goto L3",
 
                 "L4:",
@@ -524,19 +494,15 @@ public class TryCatchTests {
 
                 "L1:",
                 "e = exception",
-                "t7 = \"Error\"",
-                "t8 = t7",
-                "call print(t8)",
+                "t2 = \"Error\"",
+                "call print(t2)",
                 "L2:"
         );
 
         assertEquals(expected, testInit.generateTAC(code));
     }
 
-    // ========================================
     // TESTS DE TRY-CATCH CON BREAK/CONTINUE
-    // ========================================
-
     @Test
     @DisplayName("Try-catch con break dentro del try")
     void testTryCatchWithBreak() {
@@ -563,8 +529,7 @@ public class TryCatchTests {
                 "L3:",
                 "e = exception",
                 "t2 = \"Error\"",
-                "t3 = t2",
-                "call print(t3)",
+                "call print(t2)",
                 "L4:",
 
                 "goto L1",
@@ -595,26 +560,24 @@ public class TryCatchTests {
                 "i = t1",
 
                 "L1:",
-                "t2 = 3",
-                "t3 = i < t2",
-                "if t3 == 0 goto L2",
+                "t1 = 3",
+                "t2 = i < t1",
+                "if t2 == 0 goto L2",
 
                 "try_begin L3",
-                "t4 = 1",
-                "t5 = i + t4",
-                "i = t5",
+                "t1 = 1",
+                "t3 = i + t1",
+                "i = t3",
                 "goto L1",
-                "t6 = \"No se ejecuta\"",
-                "t7 = t6",
-                "call print(t7)",
+                "t3 = \"No se ejecuta\"",
+                "call print(t3)",
                 "try_end",
                 "goto L4",
 
                 "L3:",
                 "e = exception",
-                "t8 = \"Error\"",
-                "t9 = t8",
-                "call print(t9)",
+                "t3 = \"Error\"",
+                "call print(t3)",
                 "L4:",
 
                 "goto L1",
@@ -649,25 +612,27 @@ public class TryCatchTests {
                 "t1 = a / b",
                 "return t1",
                 "end divide",
+
                 "try_begin L1",
-                "t4 = 10",
-                "t3 = t4",
-                "t6 = 0",
-                "t5 = t6",
-                "t2 = call divide(t3, t5)",
-                "result = t2",
-                "t7 = result",
-                "call print(t7)",
+
+                "t2 = 10",
+                "t3 = 0",
+                "t1 = call divide(t2, t3)",
+                "result = t1",
+
+                "t1 = result",
+                "call print(t1)",
+
                 "try_end",
                 "goto L2",
+
                 "L1:",
                 "e = exception",
-                "t8 = \"Error de división\"",
-                "t9 = t8",
-                "call print(t9)",
+                "t1 = \"Error de división\"",
+                "call print(t1)",
+
                 "L2:"
         );
-
         assertEquals(expected, testInit.generateTAC(code));
     }
 
@@ -689,22 +654,25 @@ public class TryCatchTests {
         List<String> expected = Arrays.asList(
                 "safeDivide:",
                 "try_begin L1",
+
                 "t1 = a / b",
                 "return t1",
+
                 "try_end",
                 "goto L2",
+
                 "L1:",
                 "e = exception",
-                "t2 = 0",
-                "return t2",
+                "t1 = 0",
+                "return t1",
+
                 "L2:",
                 "end safeDivide",
-                "t5 = 10",
-                "t4 = t5",
-                "t7 = 2",
-                "t6 = t7",
-                "t3 = call safeDivide(t4, t6)",
-                "x = t3"
+
+                "t2 = 10",
+                "t3 = 2",
+                "t1 = call safeDivide(t2, t3)",
+                "x = t1"
         );
 
         assertEquals(expected, testInit.generateTAC(code));
@@ -741,38 +709,36 @@ public class TryCatchTests {
 
                 "t1 = 10",
                 "a = t1",
-                "t2 = 20",
-                "b = t2",
-                "t3 = a + b",
-                "c = t3",
+                "t1 = 20",
+                "b = t1",
+                "t1 = a + b",
+                "c = t1",
 
-                "t4 = 25",
-                "t5 = c > t4",
-                "if t5 == 0 goto L3",
-                "t6 = \"Grande\"",
-                "t7 = t6",
-                "call print(t7)",
+                "t1 = 25",
+                "t2 = c > t1",
+                "if t2 == 0 goto L3",
+                "t1 = \"Grande\"",
+                "call print(t1)",
                 "goto L4",
                 "L3:",
-                "t8 = \"Pequeño\"",
-                "t9 = t8",
-                "call print(t9)",
+                "t1 = \"Pequeño\"",
+                "call print(t1)",
                 "L4:",
 
-                "t10 = 2",
-                "t11 = c * t10",
-                "d = t11",
-                "t12 = d",
-                "call print(t12)",
+                "t2 = 2",
+                "t1 = c * t2",
+                "d = t1",
+                "t1 = d",
+                "call print(t1)",
 
                 "try_end",
                 "goto L2",
 
                 "L1:",
                 "e = exception",
-                "t13 = \"Error complejo\"",
-                "t14 = t13",
-                "call print(t14)",
+                "t1 = \"Error complejo\"",
+                "call print(t1)",
+
                 "L2:"
         );
 
@@ -801,25 +767,26 @@ public class TryCatchTests {
 
                 "t1 = 1",
                 "x = t1",
-                "t2 = 0",
-                "y = t2",
+                "t1 = 0",
+                "y = t1",
 
-                "t3 = 0",
+                // z = x && y
+                "t1 = 0",
                 "if x == 0 goto L3",
-                "t3 = y",
+                "t1 = y",
                 "L3:",
-                "z = t3",
+                "z = t1",
 
-                "t4 = 1",
+                // (z || !x)
+                "t1 = 1",
                 "if z != 0 goto L4",
-                "t5 = !x",
-                "t4 = t5",
+                "t2 = !x",
+                "t1 = t2",
                 "L4:",
 
-                "if t4 == 0 goto L5",
-                "t6 = \"Condición compleja\"",
-                "t7 = t6",
-                "call print(t7)",
+                "if t1 == 0 goto L5",
+                "t2 = \"Condición compleja\"",
+                "call print(t2)",
                 "L5:",
 
                 "try_end",
@@ -827,19 +794,16 @@ public class TryCatchTests {
 
                 "L1:",
                 "e = exception",
-                "t8 = \"Error\"",
-                "t9 = t8",
-                "call print(t9)",
+                "t1 = \"Error\"",
+                "call print(t1)",
+
                 "L2:"
         );
 
         assertEquals(expected, testInit.generateTAC(code));
     }
 
-    // ========================================
     // TESTS DE CASOS EDGE
-    // ========================================
-
     @Test
     @DisplayName("Try-catch con try vacío")
     void testTryCatchWithEmptyTry() {
@@ -857,8 +821,7 @@ public class TryCatchTests {
                 "L1:",
                 "e = exception",
                 "t1 = \"Error\"",
-                "t2 = t1",
-                "call print(t2)",
+                "call print(t1)",
                 "L2:"
         );
 
@@ -878,8 +841,7 @@ public class TryCatchTests {
         List<String> expected = Arrays.asList(
                 "try_begin L1",
                 "t1 = 1",
-                "t2 = t1",
-                "call print(t2)",
+                "call print(t1)",
                 "try_end",
                 "goto L2",
                 "L1:",
@@ -911,9 +873,8 @@ public class TryCatchTests {
                 "goto L2",
                 "L1:",
                 "error = exception",
-                "t4 = \"Error genérico\"",
-                "t5 = t4",
-                "call print(t5)",
+                "t3 = \"Error genérico\"",
+                "call print(t3)",
                 "L2:"
         );
 
@@ -939,42 +900,37 @@ public class TryCatchTests {
 
                 "t1 = 1",
                 "arr[0] = t1",
-                "t2 = 2",
-                "arr[1] = t2",
-                "t3 = 3",
-                "arr[2] = t3",
+                "t1 = 2",
+                "arr[1] = t1",
+                "t1 = 3",
+                "arr[2] = t1",
 
-                "t4 = 10",
-                "t5 = arr[t4]",
-                "x = t5",
+                "t1 = 10",
+                "t2 = arr[t1]",
+                "x = t2",
 
-                "t6 = 10",
-                "t7 = 0",
-                "t8 = t6 / t7",
-                "y = t8",
+                "t2 = 10",
+                "t1 = 0",
+                "t3 = t2 / t1",
+                "y = t3",
 
-                "t9 = x + y",
-                "t10 = t9",
-                "call print(t10)",
+                "t3 = x + y",
+                "call print(t3)",
 
                 "try_end",
                 "goto L2",
 
                 "L1:",
                 "e = exception",
-                "t11 = \"Múltiples errores posibles\"",
-                "t12 = t11",
-                "call print(t12)",
+                "t3 = \"Múltiples errores posibles\"",
+                "call print(t3)",
                 "L2:"
         );
 
         assertEquals(expected, testInit.generateTAC(code));
     }
 
-    // ========================================
     // TESTS DE TRY-CATCH CON SWITCH
-    // ========================================
-
     @Test
     @DisplayName("Try-catch con switch dentro")
     void testTryCatchWithSwitch() {
@@ -999,30 +955,27 @@ public class TryCatchTests {
 
                 "t1 = 2",
                 "x = t1",
-                "t2 = x",
+                "t1 = x",
 
-                "t3 = 1",
-                "if t2 == t3 goto L4",
-                "t4 = 2",
-                "if t2 == t4 goto L5",
+                "t2 = 1",
+                "if t1 == t2 goto L4",
+                "t3 = 2",
+                "if t1 == t3 goto L5",
                 "goto L6",
 
                 "L4:",
-                "t5 = 1",
-                "t6 = t5",
-                "call print(t6)",
+                "t4 = 1",
+                "call print(t4)",
                 "goto L3",
 
                 "L5:",
-                "t7 = 2",
-                "t8 = t7",
-                "call print(t8)",
+                "t4 = 2",
+                "call print(t4)",
                 "goto L3",
 
                 "L6:",
-                "t9 = 0",
-                "t10 = t9",
-                "call print(t10)",
+                "t4 = 0",
+                "call print(t4)",
                 "L3:",
 
                 "try_end",
@@ -1030,9 +983,8 @@ public class TryCatchTests {
 
                 "L1:",
                 "e = exception",
-                "t11 = \"Error\"",
-                "t12 = t11",
-                "call print(t12)",
+                "t3 = \"Error\"",
+                "call print(t3)",
                 "L2:"
         );
 
@@ -1059,31 +1011,28 @@ public class TryCatchTests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "x = t1",
-                "t2 = x",
+                "t1 = x",
 
-                "t3 = 1",
-                "if t2 == t3 goto L2",
+                "t2 = 1",
+                "if t1 == t2 goto L2",
                 "goto L3",
 
                 "L2:",
                 "try_begin L4",
-                "t4 = 1",
-                "t5 = t4",
-                "call print(t5)",
+                "t3 = 1",
+                "call print(t3)",
                 "try_end",
                 "goto L5",
                 "L4:",
                 "e = exception",
-                "t6 = \"Error\"",
-                "t7 = t6",
-                "call print(t7)",
+                "t3 = \"Error\"",
+                "call print(t3)",
                 "L5:",
                 "goto L1",
 
                 "L3:",
-                "t8 = 0",
-                "t9 = t8",
-                "call print(t9)",
+                "t3 = 0",
+                "call print(t3)",
                 "L1:"
         );
 
@@ -1117,19 +1066,17 @@ public class TryCatchTests {
                 "end Class MyClass",
 
                 "try_begin L1",
-                "t2 = new MyClass()",
-                "obj = t2",
-                "t3 = obj.value",
-                "t4 = t3",
-                "call print(t4)",
+                "t1 = new MyClass()",
+                "obj = t1",
+                "t1 = obj.value",
+                "call print(t1)",
                 "try_end",
                 "goto L2",
 
                 "L1:",
                 "e = exception",
-                "t5 = \"Error al crear objeto\"",
-                "t6 = t5",
-                "call print(t6)",
+                "t1 = \"Error al crear objeto\"",
+                "call print(t1)",
                 "L2:"
         );
 

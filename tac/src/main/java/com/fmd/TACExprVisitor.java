@@ -335,6 +335,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
 
         callInstruction.setArg1(funcName);
 
+        List<String> valsToFree =  new ArrayList<>();
         if (ctx.arguments() != null) {
             List<CompiscriptParser.ExpressionContext> args = ctx.arguments().expression();
             for (CompiscriptParser.ExpressionContext arg : args) {
@@ -350,8 +351,12 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
                 }
 
                 callInstruction.addParam(tempName); // guardarla como parametro
-                generator.freeTemp(tempName);
+                valsToFree.add(tempName);
             }
+        }
+
+        for (String val : valsToFree) {
+            generator.freeTemp(val);
         }
 
         generator.addInstruction(callInstruction);
@@ -370,7 +375,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         instr.setResult(temp);
         instr.setArg1(arrayName + "[" + indexVal + "]");
         generator.addInstruction(instr);
-
+        generator.freeTemp(indexVal);
         return temp;
     }
 
@@ -556,8 +561,10 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
                 instr.setResult(indexStr.toString());
                 instr.setArg1(val);
                 generator.addInstruction(instr);
+                generator.freeTemp(val);
             }
         }
+        generator.freeTemp(varName);
     }
 
     private String getAssignedVariable(ParseTree ctx) {
@@ -705,6 +712,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         }
 
         generator.setAssignment(false);
+        generator.freeTemp(rhs);
         return lhs; // devuelve el nombre de la variable asignada
     }
 

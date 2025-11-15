@@ -91,7 +91,6 @@ public class TACGenerator {
      */
     public void addInstruction(TACInstruction instr) {
         instructions.add(instr);
-        System.out.println(instr.toString());
     }
 
     /**
@@ -170,6 +169,7 @@ public class TACGenerator {
      * @return Etiqueta de continue o null si no hay loop activo
      */
     public String getCurrentContinueLabel() {
+        System.out.println(continueLabels);
         return continueLabels.isEmpty() ? null : continueLabels.peek();
     }
 

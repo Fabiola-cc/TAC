@@ -411,7 +411,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         String endLabel = generator.newLabel();
 
         // 3. Marcar inicio de loop
-        generator.enterLoop(endLabel, null); // no necesitamos updateLabel
+        generator.enterLoop(endLabel, startLabel);
 
         // 4. Etiqueta de inicio del loop
         TACInstruction startLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);

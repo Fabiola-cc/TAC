@@ -23,16 +23,17 @@ public class P4Tests {
                 "t1 = 0",
                 "i = t1",
                 "L1:",
-                "t2 = 3",
-                "t3 = i < t2",
-                "if t3 == 0 goto L2",
-                "t4 = 1",
-                "t5 = i == t4",
-                "if t5 == 0 goto L3",
+                "t1 = 3",
+                "t2 = i < t1",
+                "if t2 == 0 goto L2",
+                "t1 = 1",
+                "t3 = i == t1",
+                "if t3 == 0 goto L3",
+                "goto L1",
                 "L3:",
-                "t6 = 1",
-                "t7 = i + t6",
-                "i = t7",
+                "t3 = 1",
+                "t1 = i + t3",
+                "i = t1",
                 "goto L1",
                 "L2:"
         );
@@ -48,25 +49,25 @@ public class P4Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "numbers[0] = t1",
-                "t2 = 2",
-                "numbers[1] = t2",
-                "t3 = 3",
-                "numbers[2] = t3",
-                "t4 = 4",
-                "numbers[3] = t4",
-                "t5 = 5",
-                "numbers[4] = t5",
-                "t6 = 0",
-                "t7 = 5",
+                "t1 = 2",
+                "numbers[1] = t1",
+                "t1 = 3",
+                "numbers[2] = t1",
+                "t1 = 4",
+                "numbers[3] = t1",
+                "t1 = 5",
+                "numbers[4] = t1",
+                "t1 = 0",
+                "t2 = 5",
                 "L1:",
-                "t8 = t6 < t7",
-                "if t8 == 0 goto L2",
-                "t9 = numbers[t6]",
-                "num = t9",
-                "t10 = num",
-                "call print(t10)",
-                "t11 = t6 + 1",
-                "t6 = t11",
+                "t3 = t1 < t2",
+                "if t3 == 0 goto L2",
+                "t4 = numbers[t1]",
+                "num = t4",
+                "t5 = num",
+                "call print(t5)",
+                "t5 = t1 + 1",
+                "t1 = t5",
                 "goto L1",
                 "L2:"
         );
@@ -89,18 +90,18 @@ public class P4Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 3",
                 "a = t1",
-                "t2 = 2",
-                "b = t2",
-                "t3 = a > b",
-                "if t3 == 1 goto L1",
+                "t1 = 2",
+                "b = t1",
+                "t1 = a > b",
+                "if t1 == 1 goto L1",
                 "goto L2",
                 "L1:",
-                "t4 = a",
+                "t2 = a",
                 "goto L3",
                 "L2:",
-                "t4 = b",
+                "t2 = b",
                 "L3:",
-                "x = t4"
+                "x = t2"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -111,29 +112,29 @@ public class P4Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "a = t1",
-                "t2 = 2",
-                "b = t2",
-                "t3 = 3",
-                "c = t3",
-                "t4 = a > b",
-                "if t4 == 1 goto L1",
+                "t1 = 2",
+                "b = t1",
+                "t1 = 3",
+                "c = t1",
+                "t1 = a > b",
+                "if t1 == 1 goto L1",
                 "goto L2",
                 "L1:",
-                "t5 = a",
+                "t2 = a",
                 "goto L3",
                 "L2:",
-                "t6 = b > c",
-                "if t6 == 1 goto L4",
+                "t3 = b > c",
+                "if t3 == 1 goto L4",
                 "goto L5",
                 "L4:",
-                "t7 = b",
+                "t4 = b",
                 "goto L6",
                 "L5:",
-                "t7 = c",
+                "t4 = c",
                 "L6:",
-                "t5 = t7",
+                "t2 = t4",
                 "L3:",
-                "x = t5"
+                "x = t2"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -146,17 +147,17 @@ public class P4Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "numbers[0] = t1",
-                "t2 = 2",
-                "numbers[1] = t2",
-                "t3 = 3",
-                "numbers[2] = t3",
-                "t4 = 4",
-                "numbers[3] = t4",
-                "t5 = 5",
-                "numbers[4] = t5"
+                "t1 = 2",
+                "numbers[1] = t1",
+                "t1 = 3",
+                "numbers[2] = t1",
+                "t1 = 4",
+                "numbers[3] = t1",
+                "t1 = 5",
+                "numbers[4] = t1"
         );
 
-        List<String> actual = testInit.generateTAC(code); // tu método para generar TAC
+        List<String> actual = testInit.generateTAC(code);
 
         assertEquals(expected, actual);
     }
@@ -168,13 +169,13 @@ public class P4Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "numbers[0] = t1",
-                "t2 = 2",
-                "numbers[1] = t2",
-                "t3 = 3",
-                "numbers[2] = t3",
-                "t4 = 1",
-                "t5 = numbers[t4]", // temporal que captura numbers[1]
-                "x = t5"
+                "t1 = 2",
+                "numbers[1] = t1",
+                "t1 = 3",
+                "numbers[2] = t1",
+                "t1 = 1",
+                "t2 = numbers[t1]", // temporal que captura numbers[1]
+                "x = t2"
         );
 
         List<String> actual = testInit.generateTAC(code);

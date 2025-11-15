@@ -30,8 +30,8 @@ public class P5Tests {
                 "t1 = \"doggy\"",
                 "name = t1",
                 "speak:",
-                "t2 = name",
-                "call print(t2)",
+                "t1 = name",
+                "call print(t1)",
                 "end speak",
                 "end Class Animal"
         );
@@ -53,10 +53,10 @@ public class P5Tests {
                 "t1 = 0",
                 "value = t1",
                 "inc:",
-                "t2 = this.value",
-                "t3 = 1",
-                "t4 = t2 + t3",
-                "this.value = t4",
+                "t1 = this.value",
+                "t2 = 1",
+                "t3 = t1 + t2",
+                "this.value = t3",
                 "end inc",
                 "end Class Counter"
         );
