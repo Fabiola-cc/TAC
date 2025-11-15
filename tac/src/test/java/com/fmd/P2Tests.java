@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("Tests para P2")
+@DisplayName("Tests para P2 (con reutilización de temporales)")
 public class P2Tests {
     TestInit testInit = new TestInit();
 
@@ -22,17 +22,14 @@ public class P2Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 5",
                 "a = t1",
-                "t2 = 10",
-                "b = t2",
-                "t3 = a < b",
-                "t4 = t3",
-                "call print(t4)",
-                "t5 = a == b",
-                "t6 = t5",
-                "call print(t6)",
-                "t7 = a != b",
-                "t8 = t7",
-                "call print(t8)"
+                "t1 = 10",
+                "b = t1",
+                "t1 = a < b",
+                "call print(t1)",
+                "t1 = a == b",
+                "call print(t1)",
+                "t1 = a != b",
+                "call print(t1)"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -43,20 +40,18 @@ public class P2Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "x = t1",
-                "t2 = 0",
-                "y = t2",
-                "t3 = 0",
+                "t1 = 0",
+                "y = t1",
+                "t1 = 0",
                 "if x == 0 goto L1",
-                "t3 = y",
+                "t1 = y",
                 "L1:",
-                "t4 = t3",
-                "call print(t4)",
-                "t5 = 1",
+                "call print(t1)",
+                "t1 = 1",
                 "if x != 0 goto L2",
-                "t5 = y",
+                "t1 = y",
                 "L2:",
-                "t6 = t5",
-                "call print(t6)"
+                "call print(t1)"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -67,19 +62,18 @@ public class P2Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "a = t1",
-                "t2 = 2",
-                "b = t2",
-                "t4 = a < b",
-                "t3 = 0",
-                "if t4 == 0 goto L1",
-                "t5 = 5",
-                "t6 = b < t5",
-                "t3 = t6",
+                "t1 = 2",
+                "b = t1",
+                "t2 = a < b",
+                "t1 = 0",
+                "if t2 == 0 goto L1",
+                "t3 = 5",
+                "t4 = b < t3",
+                "t1 = t4",
                 "L1:",
-                "if t3 == 0 goto L2",
-                "t7 = 1",
-                "t8 = t7",
-                "call print(t8)",
+                "if t1 == 0 goto L2",
+                "t4 = 1",
+                "call print(t4)",
                 "L2:"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -92,13 +86,11 @@ public class P2Tests {
                 "t1 = 1",
                 "if t1 == 0 goto L1",
                 "t2 = 1",
-                "t3 = t2",
-                "call print(t3)",
+                "call print(t2)",
                 "goto L2",
                 "L1:",
-                "t4 = 0",
-                "t5 = t4",
-                "call print(t5)",
+                "t2 = 0",
+                "call print(t2)",
                 "L2:"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -111,14 +103,14 @@ public class P2Tests {
                 "t1 = 0",
                 "i = t1",
                 "L1:",
-                "t2 = 3",
-                "t3 = i < t2",
-                "if t3 == 0 goto L2",
-                "t4 = i",
-                "call print(t4)",
-                "t5 = 1",
-                "t6 = i + t5",
-                "i = t6",
+                "t1 = 3",
+                "t2 = i < t1",
+                "if t2 == 0 goto L2",
+                "t1 = i",
+                "call print(t1)",
+                "t1 = 1",
+                "t3 = i + t1",
+                "i = t3",
                 "goto L1",
                 "L2:"
         );
@@ -132,14 +124,14 @@ public class P2Tests {
                 "t1 = 0",
                 "j = t1",
                 "L1:",
-                "t2 = j",
-                "call print(t2)",
-                "t3 = 1",
-                "t4 = j + t3",
-                "j = t4",
-                "t5 = 3",
-                "t6 = j < t5",
-                "if t6 != 0 goto L1",
+                "t1 = j",
+                "call print(t1)",
+                "t1 = 1",
+                "t2 = j + t1",
+                "j = t2",
+                "t2 = 3",
+                "t1 = j < t2",
+                "if t1 != 0 goto L1",
                 "L2:"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -152,14 +144,14 @@ public class P2Tests {
                 "t1 = 0",
                 "j = t1",
                 "L1:",
-                "t2 = 3",
-                "t3 = j < t2",
-                "if t3 == 0 goto L2",
-                "t4 = j",
-                "call print(t4)",
-                "t5 = 1",
-                "t6 = j + t5",
-                "j = t6",
+                "t1 = 3",
+                "t2 = j < t1",
+                "if t2 == 0 goto L2",
+                "t1 = j",
+                "call print(t1)",
+                "t1 = 1",
+                "t3 = j + t1",
+                "j = t3",
                 "goto L1",
                 "L2:"
         );
@@ -174,9 +166,8 @@ public class P2Tests {
                 "t2 = 2",
                 "t3 = t1 < t2",
                 "if t3 == 0 goto L1",
-                "t4 = 100",
-                "t5 = t4",
-                "call print(t5)",
+                "t2 = 100",
+                "call print(t2)",
                 "L1:"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -191,13 +182,11 @@ public class P2Tests {
                 "t2 = 0",
                 "if t2 == 0 goto L3",
                 "t3 = 0",
-                "t4 = t3",
-                "call print(t4)",
+                "call print(t3)",
                 "goto L4",
                 "L3:",
-                "t5 = 1",
-                "t6 = t5",
-                "call print(t6)",
+                "t3 = 1",
+                "call print(t3)",
                 "L4:",
                 "L1:"
         );
@@ -211,14 +200,14 @@ public class P2Tests {
                 "t1 = 0",
                 "i = t1",
                 "L1:",
-                "t2 = 2",
-                "t3 = i < t2",
-                "if t3 == 0 goto L2",
-                "t4 = i",
-                "call print(t4)",
-                "t5 = 1",
-                "t6 = i + t5",
-                "i = t6",
+                "t1 = 2",
+                "t2 = i < t1",
+                "if t2 == 0 goto L2",
+                "t1 = i",
+                "call print(t1)",
+                "t1 = 1",
+                "t3 = i + t1",
+                "i = t3",
                 "goto L1",
                 "L2:"
         );
@@ -231,11 +220,10 @@ public class P2Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "a = t1",
-                "t2 = 2",
-                "b = t2",
-                "t3 = a + b",
-                "t4 = t3",
-                "call print(t4)"
+                "t1 = 2",
+                "b = t1",
+                "t1 = a + b",
+                "call print(t1)"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -246,21 +234,21 @@ public class P2Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 0",
                 "a = t1",
-                "t2 = 1",
-                "b = t2",
+                "t1 = 1",
+                "b = t1",
                 "L1:",
-                "t4 = 3",
-                "t5 = a < t4",
-                "t3 = 0",
-                "if t5 == 0 goto L3",
-                "t6 = 5",
-                "t7 = b < t6",
-                "t3 = t7",
+                "t2 = 3",
+                "t3 = a < t2",
+                "t1 = 0",
+                "if t3 == 0 goto L3",
+                "t2 = 5",
+                "t4 = b < t2",
+                "t1 = t4",
                 "L3:",
-                "if t3 == 0 goto L2",
-                "t8 = 1",
-                "t9 = a + t8",
-                "a = t9",
+                "if t1 == 0 goto L2",
+                "t4 = 1",
+                "t3 = a + t4",
+                "a = t3",
                 "goto L1",
                 "L2:"
         );
@@ -274,22 +262,22 @@ public class P2Tests {
                 "t1 = 0",
                 "i = t1",
                 "L1:",
-                "t2 = 0",
-                "j = t2",
+                "t1 = 0",
+                "j = t1",
                 "L3:",
-                "t3 = 1",
-                "t4 = j + t3",
-                "j = t4",
-                "t5 = 2",
-                "t6 = j < t5",
-                "if t6 != 0 goto L3",
+                "t1 = 1",
+                "t2 = j + t1",
+                "j = t2",
+                "t2 = 2",
+                "t1 = j < t2",
+                "if t1 != 0 goto L3",
                 "L4:",
-                "t7 = 1",
-                "t8 = i + t7",
-                "i = t8",
-                "t9 = 2",
-                "t10 = i < t9",
-                "if t10 != 0 goto L1",
+                "t1 = 1",
+                "t2 = i + t1",
+                "i = t2",
+                "t2 = 2",
+                "t1 = i < t2",
+                "if t1 != 0 goto L1",
                 "L2:"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -302,29 +290,29 @@ public class P2Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "a = t1",
-                "t2 = 2",
-                "b = t2",
-                "t3 = a < b",
-                "if t3 == 0 goto L1",
-                "t4 = a",
-                "call print(t4)",
+                "t1 = 2",
+                "b = t1",
+                "t1 = a < b",
+                "if t1 == 0 goto L1",
+                "t2 = a",
+                "call print(t2)",
                 "goto L2",
                 "L1:",
-                "t5 = b",
-                "call print(t5)",
+                "t2 = b",
+                "call print(t2)",
                 "L2:",
                 "L3:",
-                "t6 = 3",
-                "t7 = a < t6",
-                "if t7 == 0 goto L4",
-                "t8 = 1",
-                "t9 = a + t8",
-                "a = t9",
-                "t10 = 2",
-                "t11 = a == t10",
-                "if t11 == 0 goto L5",
-                "t12 = a",
-                "call print(t12)",
+                "t1 = 3",
+                "t2 = a < t1",
+                "if t2 == 0 goto L4",
+                "t1 = 1",
+                "t3 = a + t1",
+                "a = t3",
+                "t3 = 2",
+                "t1 = a == t3",
+                "if t1 == 0 goto L5",
+                "t3 = a",
+                "call print(t3)",
                 "L5:",
                 "goto L3",
                 "L4:"
@@ -332,6 +320,5 @@ public class P2Tests {
 
         assertEquals(expected, testInit.generateTAC(code));
     }
-
 
 }

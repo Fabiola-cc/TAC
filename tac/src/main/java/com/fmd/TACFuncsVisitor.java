@@ -102,6 +102,7 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
 
         generator.addInstruction(returnInstruction);
         generator.setAssignment(false);
+        generator.freeTemp(result);
         return null;
     }
 }

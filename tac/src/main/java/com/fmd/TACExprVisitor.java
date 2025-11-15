@@ -76,6 +76,8 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
             instr.setArg2(right);
             instr.setOperator(op);
             generator.addInstruction(instr);
+            generator.freeTemp(result);
+            generator.freeTemp(right);
 
             result = temp;
         }
@@ -102,6 +104,8 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
             instr.setArg2(right);
             instr.setOperator(op);
             generator.addInstruction(instr);
+            generator.freeTemp(result);
+            generator.freeTemp(right);
 
             result = temp;
         }
@@ -124,7 +128,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         instr.setArg1(operand);
         instr.setOperator(op);
         generator.addInstruction(instr);
-
+        generator.freeTemp(operand);
         return temp;
     }
 
@@ -164,6 +168,8 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
             instr.setArg2(right);
             instr.setOperator(op);
             generator.addInstruction(instr);
+            generator.freeTemp(left);
+            generator.freeTemp(right);
 
             left = temp;
         }
@@ -194,6 +200,8 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
             instr.setArg2(right);
             instr.setOperator(op);
             generator.addInstruction(instr);
+            generator.freeTemp(left);
+            generator.freeTemp(right);
 
             left = temp;
         }
@@ -238,6 +246,8 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         TACInstruction lblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
         lblInstr.setLabel(endLabel);
         generator.addInstruction(lblInstr);
+        generator.freeTemp(left);
+        generator.freeTemp(right);
 
         return result;
     }
@@ -282,6 +292,9 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         lblInstr.setLabel(endLabel);
         generator.addInstruction(lblInstr);
 
+        generator.freeTemp(left);
+        generator.freeTemp(right);
+
         return result;
     }
 
@@ -325,15 +338,19 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         if (ctx.arguments() != null) {
             List<CompiscriptParser.ExpressionContext> args = ctx.arguments().expression();
             for (CompiscriptParser.ExpressionContext arg : args) {
-                String tempName = generator.newTemp();
                 String literalValue = visit(arg); // evaluar expresion
+                String tempName = literalValue;
 
-                TACInstruction paramInstruction = new TACInstruction(TACInstruction.OpType.ASSIGN);
-                paramInstruction.setResult(tempName);
-                paramInstruction.setArg1(literalValue);
-                generator.addInstruction(paramInstruction);
+                if (!(literalValue.startsWith("t") && Integer.parseInt(literalValue.substring(1)) > 0)) {
+                    tempName = generator.newTemp();
+                    TACInstruction paramInstruction = new TACInstruction(TACInstruction.OpType.ASSIGN);
+                    paramInstruction.setResult(tempName);
+                    paramInstruction.setArg1(literalValue);
+                    generator.addInstruction(paramInstruction);
+                }
 
                 callInstruction.addParam(tempName); // guardarla como parametro
+                generator.freeTemp(tempName);
             }
         }
 
@@ -556,10 +573,6 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         return null; // no se encontró
     }
 
-
-
-
-
     /**
      * cond ? expr1 : expr2
      *
@@ -598,6 +611,7 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         assignTrueInstr.setResult(result);
         assignTrueInstr.setArg1(trueResult);
         generator.addInstruction(assignTrueInstr);
+        generator.freeTemp(trueResult);
 
         TACInstruction toEndInstr = new TACInstruction(TACInstruction.OpType.GOTO);
         toEndInstr.setLabel(labelEnd);
@@ -612,10 +626,13 @@ public class TACExprVisitor extends CompiscriptBaseVisitor<String> {
         assignFalseInstr.setResult(result);
         assignFalseInstr.setArg1(falseResult);
         generator.addInstruction(assignFalseInstr);
+        generator.freeTemp(falseResult);
 
         TACInstruction endLabel = new TACInstruction(TACInstruction.OpType.LABEL);
         endLabel.setLabel(labelEnd);
         generator.addInstruction(endLabel);
+
+        generator.freeTemp(orExpr);
 
         return result;
     }

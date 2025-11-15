@@ -21,6 +21,7 @@ public class TACGenerator {
 
     // Contadores para generar nombres únicos
     private int tempCounter;
+    private Deque<String> freeTemps = new ArrayDeque<>();
     private int labelCounter;
 
     // Pilas para manejar break y continue en loops
@@ -58,8 +59,21 @@ public class TACGenerator {
      * @return Nombre del temporal (t1, t2, t3, ...)
      */
     public String newTemp() {
+        if (!freeTemps.isEmpty()) {
+            return freeTemps.pop();
+        }
         tempCounter++;
         return "t" + tempCounter;
+    }
+
+    /**
+     * Marca un temporal como libre para poder reciclarlo.
+     */
+    public void freeTemp(String temp) {
+        // Evitar meter temporales inválidos o duplicados
+        if (temp != null && temp.startsWith("t") && !freeTemps.contains(temp)) {
+            freeTemps.push(temp);
+        }
     }
 
     /**
@@ -77,6 +91,7 @@ public class TACGenerator {
      */
     public void addInstruction(TACInstruction instr) {
         instructions.add(instr);
+        System.out.println(instr.toString());
     }
 
     /**

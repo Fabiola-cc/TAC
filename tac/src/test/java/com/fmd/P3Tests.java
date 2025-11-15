@@ -26,8 +26,8 @@ public class P3Tests {
                 "speak:",
                 "t1 = \" makes a sound.\"",
                 "printVar = t1",
-                "t2 = name + printVar",
-                "return t2",
+                "t1 = name + printVar",
+                "return t1",
                 "end speak"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -43,12 +43,11 @@ public class P3Tests {
                 "speak:",
                 "t1 = \" makes a sound.\"",
                 "printVar = t1",
-                "t2 = name + printVar",
-                "return t2",
+                "t1 = name + printVar",
+                "return t1",
                 "end speak",
-                "t4 = \"hola\"",
-                "t3 = t4",
-                "call speak(t3)"
+                "t1 = \"hola\"",
+                "call speak(t1)"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -70,10 +69,9 @@ public class P3Tests {
                 "t1 = a + b",
                 "return t1",
                 "end inner",
-                "t4 = 5",
-                "t3 = t4",
-                "t2 = call inner(t3)",
-                "return t2",
+                "t2 = 5",
+                "t1 = call inner(t2)",
+                "return t1",
                 "end outer"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -101,13 +99,11 @@ public class P3Tests {
                 "end add",
                 "return add",
                 "end makeAdder",
-                "t4 = 5",
-                "t3 = t4",
-                "t2 = call makeAdder(t3)",
-                "add5 = t2",
-                "t6 = 3",
-                "t5 = t6",
-                "call add5(t5)"
+                "t2 = 5",
+                "t1 = call makeAdder(t2)",
+                "add5 = t1",
+                "t1 = 3",
+                "call add5(t1)"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -133,17 +129,17 @@ public class P3Tests {
                 "t1 = 1",
                 "v = t1",
                 "b:",
-                "t2 = 2",
-                "w = t2",
+                "t1 = 2",
+                "w = t1",
                 "c:",
-                "t3 = v + w",
-                "return t3",
+                "t1 = v + w",
+                "return t1",
                 "end c",
-                "t4 = call c()",
-                "return t4",
+                "t1 = call c()",
+                "return t1",
                 "end b",
-                "t5 = call b()",
-                "return t5",
+                "t1 = call b()",
+                "return t1",
                 "end a"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -171,15 +167,15 @@ public class P3Tests {
                 "t1 = 0",
                 "count = t1",
                 "inc:",
-                "t2 = 1",
-                "t3 = count + t2",
-                "count = t3",
+                "t1 = 1",
+                "t2 = count + t1",
+                "count = t2",
                 "return count",
                 "end inc",
                 "return inc",
                 "end counter",
-                "t4 = call counter()",
-                "c = t4",
+                "t2 = call counter()",
+                "c = t2",
                 "call c()",
                 "call c()"
         );

@@ -78,13 +78,12 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
                 instr.setArg1(value);
                 generator.addInstruction(instr);
             }
+            generator.freeTemp(value);
             generator.setAssignment(false);
         }
 
         return null;
     }
-
-
 
     /**
      * Asignación simple:
@@ -113,6 +112,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
             instr.setResult(varName);
             instr.setArg1(value);
             generator.addInstruction(instr);
+            generator.freeTemp(value);
         } else if (ctx.expression().size() == 2) {
             String result = exprVisitor.visit(ctx.expression(0));
             result = result + "." + ctx.Identifier().getText();
@@ -143,20 +143,25 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         // Evaluar la expresión a imprimir y guardar en un temporal
         generator.setAssignment(true);
         String value = exprVisitor.visit(ctx.expression());
-        String temp = generator.newTemp();
+        String temp = value;
 
-        // Asignar el valor de la expresión al temporal
-        TACInstruction assignInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
-        assignInstr.setResult(temp);
-        assignInstr.setArg1(value);
-        generator.addInstruction(assignInstr);
-
+        if (!(value.startsWith("t") && Integer.parseInt(value.substring(1)) > 0)) {
+            temp = generator.newTemp();
+            // Asignar el valor de la expresión al temporal
+            TACInstruction assignInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
+            assignInstr.setResult(temp);
+            assignInstr.setArg1(value);
+            generator.addInstruction(assignInstr);
+        }
+        generator.freeTemp(value);
         // Generar instrucción CALL print usando el temporal
         TACInstruction printInstr = new TACInstruction(TACInstruction.OpType.CALL);
         printInstr.setArg1("print");
         printInstr.addParam(temp);
         generator.addInstruction(printInstr);
         generator.setAssignment(false);
+
+        generator.freeTemp(temp);
         return null;
     }
 
@@ -181,7 +186,6 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         exprVisitor.visit(ctx);
         return null;
     }
-
 
     // CONTROL DE FLUJO
     /**
@@ -261,11 +265,9 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
             elseLblInstr.setLabel(elseLabel);
             generator.addInstruction(elseLblInstr);
         }
-
+        generator.freeTemp(condition);
         return null;
     }
-
-
 
     /**
      * While loop:
@@ -320,6 +322,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
         // 9. Marcar fin de loop
         generator.exitLoop();
+        generator.freeTemp(condition);
 
         return null;
     }
@@ -372,6 +375,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
         // 8. Marcar fin de loop
         generator.exitLoop();
+        generator.freeTemp(condition);
 
         return null;
     }
@@ -413,11 +417,12 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         TACInstruction startLblInstr = new TACInstruction(TACInstruction.OpType.LABEL);
         startLblInstr.setLabel(startLabel);
         generator.addInstruction(startLblInstr);
+        String condition = "";
 
         // 5. Evaluar condición si existe
         if (ctx.expression(0) != null) {
             TACExprVisitor exprVisitor = new TACExprVisitor(generator);
-            String condition = exprVisitor.visit(ctx.expression(0));
+            condition = exprVisitor.visit(ctx.expression(0));
 
             // 6. Salto condicional: if condition == 0 goto endLabel
             TACInstruction ifGoto = new TACInstruction(TACInstruction.OpType.IF_GOTO);
@@ -448,6 +453,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
 
         // 11. Marcar fin de loop
         generator.exitLoop();
+        generator.freeTemp(condition);
 
         return null;
     }
@@ -496,6 +502,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         instr.setResult(varName);
         instr.setArg1(value);
         generator.addInstruction(instr);
+        generator.freeTemp(value);
 
         return null;
     }
@@ -543,7 +550,6 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         lenInstr.setArg1(String.valueOf(listLen));
         generator.addInstruction(lenInstr);
 
-
         // Crear etiquetas
         String loopLabel = generator.newLabel();
         String loopEndLabel = generator.newLabel();
@@ -571,7 +577,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         generator.addInstruction(moveInstr);
 
         //  Obtener elemento actual
-        String nameList = ctx.expression().getText(); // TODO
+        String nameList = ctx.expression().getText();
         String access_temp = generator.newTemp();
 
         TACInstruction accessInstr = new TACInstruction(TACInstruction.OpType.ASSIGN);
@@ -611,6 +617,12 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         loopEndInstr.setLabel(loopEndLabel);
         generator.addInstruction(loopEndInstr);
         generator.exitLoop();
+
+        generator.freeTemp(temp_index);
+        generator.freeTemp(temp_len);
+        generator.freeTemp(cond_temp);
+        generator.freeTemp(access_temp);
+        generator.freeTemp(temp);
         return null;
     }
 
@@ -672,12 +684,12 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         }
         // Si existe default, crear su etiqueta; si no, usar endLabel
         String defaultLabel = ctx.defaultCase() != null ? generator.newLabel() : endLabel;
-
+        String caseValue = "";
         // 4. Generar comparaciones y saltos condicionales para cada case
         // Se generan todas las comparaciones primero (optimización de saltos)
         for (int i = 0; i < ctx.switchCase().size(); i++) {
             CompiscriptParser.SwitchCaseContext caseCtx = ctx.switchCase(i);
-            String caseValue = exprVisitor.visit(caseCtx.expression());
+            caseValue = exprVisitor.visit(caseCtx.expression());
 
             // if switchTemp == caseValue goto caseLabel
             TACInstruction ifGoto = new TACInstruction(TACInstruction.OpType.IF_GOTO);
@@ -741,6 +753,8 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         TACInstruction endInstr = new TACInstruction(TACInstruction.OpType.LABEL);
         endInstr.setLabel(endLabel);
         generator.addInstruction(endInstr);
+        generator.freeTemp(switchTemp);
+        generator.freeTemp(caseValue);
 
         return null;
     }
@@ -839,6 +853,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         assignEx.setResult(catchVar);
         assignEx.setArg1("exception");  // Valor abstracto que el runtime provee
         generator.addInstruction(assignEx);
+        generator.freeTemp(catchVar);
 
         // 8. Procesar bloque catch
         visit(ctx.block(1));

@@ -22,8 +22,8 @@ public class P1Tests {
         List<String> expected = Arrays.asList(
                 "t1 = \"hola\"",
                 "s = t1",
-                "t2 = 1",
-                "b = t2"
+                "t1 = 1",
+                "b = t1"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -46,8 +46,8 @@ public class P1Tests {
                 "t2 = 3",
                 "t3 = 2",
                 "t4 = t2 * t3",
-                "t5 = t1 + t4",
-                "a = t5"
+                "t3 = t1 + t4",
+                "a = t3"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -58,8 +58,8 @@ public class P1Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 10",
                 "x = t1",
-                "t2 = x",
-                "call print(t2)"
+                "t1 = x",
+                "call print(t1)"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -81,9 +81,9 @@ public class P1Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 5",
                 "a = t1",
-                "t2 = 2",
-                "t3 = a + t2",
-                "b = t3"
+                "t1 = 2",
+                "t2 = a + t1",
+                "b = t2"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -95,13 +95,13 @@ public class P1Tests {
                 "t1 = 2",
                 "t2 = 3",
                 "t3 = t1 + t2",
-                "t4 = 4",
-                "t5 = 1",
-                "t6 = t4 - t5",
-                "t7 = t3 * t6",
-                "t8 = 5",
-                "t9 = t7 / t8",
-                "x = t9"
+                "t2 = 4",
+                "t1 = 1",
+                "t4 = t2 - t1",
+                "t1 = t3 * t4",
+                "t4 = 5",
+                "t3 = t1 / t4",
+                "x = t3"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -123,8 +123,8 @@ public class P1Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 3",
                 "t2 = -t1",
-                "t3 = -t2",
-                "x = t3"
+                "t1 = -t2",
+                "x = t1"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -135,8 +135,8 @@ public class P1Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "a = t1",
-                "t2 = 2",
-                "b = t2",
+                "t1 = 2",
+                "b = t1",
                 "a = b"
         );
         assertEquals(expected, testInit.generateTAC(code));
@@ -148,9 +148,9 @@ public class P1Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 5",
                 "a = t1",
-                "t2 = 10",
-                "t3 = a + t2",
-                "a = t3"
+                "t1 = 10",
+                "t2 = a + t1",
+                "a = t2"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
@@ -161,15 +161,15 @@ public class P1Tests {
         List<String> expected = Arrays.asList(
                 "t1 = 1",
                 "x = t1",
-                "t2 = 2",
-                "y = t2",
-                "t3 = x * y",
-                "t4 = 3",
-                "t5 = t3 + t4",
-                "t6 = -t5",
-                "t7 = 2",
-                "t8 = t6 % t7",
-                "z = t8"
+                "t1 = 2",
+                "y = t1",
+                "t1 = x * y",
+                "t2 = 3",
+                "t3 = t1 + t2",
+                "t2 = -t3",
+                "t3 = 2",
+                "t1 = t2 % t3",
+                "z = t1"
         );
         assertEquals(expected, testInit.generateTAC(code));
     }
