@@ -49,7 +49,7 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
         }
 
         // Generar etiqueta func_name:
-        TACInstruction funcInstruction = new TACInstruction(TACInstruction.OpType.LABEL);
+        TACInstruction funcInstruction = new TACInstruction(TACInstruction.OpType.LABEL_FUNCTION);
         funcInstruction.setLabel(funcName);
         generator.addInstruction(funcInstruction);
 

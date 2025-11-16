@@ -23,7 +23,7 @@ public class P3Tests {
                 "   return name + printVar;\n" +
                 "}";
         List<String> expected = Arrays.asList(
-                "speak:",
+                "Function speak:",
                 "t1 = \" makes a sound.\"",
                 "printVar = t1",
                 "t1 = name + printVar",
@@ -40,7 +40,7 @@ public class P3Tests {
                 "   return name + printVar;\n" +
                 "}\n" + "speak(\"hola\");";
         List<String> expected = Arrays.asList(
-                "speak:",
+                "Function speak:",
                 "t1 = \" makes a sound.\"",
                 "printVar = t1",
                 "t1 = name + printVar",
@@ -64,8 +64,8 @@ public class P3Tests {
             }
         """;
         List<String> expected = Arrays.asList(
-                "outer:",
-                "inner:",
+                "Function outer:",
+                "Function inner:",
                 "t1 = a + b",
                 "return t1",
                 "end inner",
@@ -92,8 +92,8 @@ public class P3Tests {
             add5(3);
         """;
         List<String> expected = Arrays.asList(
-                "makeAdder:",
-                "add:",
+                "Function makeAdder:",
+                "Function add:",
                 "t1 = x + y",
                 "return t1",
                 "end add",
@@ -125,13 +125,13 @@ public class P3Tests {
             }
         """;
         List<String> expected = Arrays.asList(
-                "a:",
+                "Function a:",
                 "t1 = 1",
                 "v = t1",
-                "b:",
+                "Function b:",
                 "t1 = 2",
                 "w = t1",
-                "c:",
+                "Function c:",
                 "t1 = v + w",
                 "return t1",
                 "end c",
@@ -163,10 +163,10 @@ public class P3Tests {
             c();
         """;
         List<String> expected = Arrays.asList(
-                "counter:",
+                "Function counter:",
                 "t1 = 0",
                 "count = t1",
-                "inc:",
+                "Function inc:",
                 "t1 = 1",
                 "t2 = count + t1",
                 "count = t2",

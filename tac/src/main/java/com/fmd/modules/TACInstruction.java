@@ -23,6 +23,8 @@ public class TACInstruction {
         TRY_BEGIN,     // try_begin catch_label
         TRY_END, // try_end
         END_CLASS, // class ending
+        LABEL_CLASS,
+        LABEL_FUNCTION,
     }
 
     private OpType op;
@@ -83,10 +85,16 @@ public class TACInstruction {
                 return "end " + label;
             case TRY_BEGIN:
                 return "try_begin " + label;  // label apunta al catch
+            case LABEL_CLASS:
+                return "Class " + label + ":";
+                case LABEL_FUNCTION:
+                    return "Function " + label + ":";
             case TRY_END:
                 return "try_end";
+
                 case END_CLASS:
                     return "end Class " + label;
+
             default:
                 return "UNKNOWN";
         }

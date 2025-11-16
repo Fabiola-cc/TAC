@@ -608,7 +608,7 @@ public class TryCatchTests {
             """;
 
         List<String> expected = Arrays.asList(
-                "divide:",
+                "Function divide:",
                 "t1 = a / b",
                 "return t1",
                 "end divide",
@@ -652,7 +652,7 @@ public class TryCatchTests {
             """;
 
         List<String> expected = Arrays.asList(
-                "safeDivide:",
+                "Function safeDivide:",
                 "try_begin L1",
 
                 "t1 = a / b",
@@ -1060,7 +1060,7 @@ public class TryCatchTests {
             """;
 
         List<String> expected = Arrays.asList(
-                "MyClass:",
+                "Class MyClass:",
                 "t1 = 10",
                 "value = t1",
                 "end Class MyClass",

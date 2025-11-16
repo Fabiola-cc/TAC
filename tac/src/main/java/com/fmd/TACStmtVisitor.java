@@ -893,7 +893,7 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         generator.enterClass(className);
 
         // Generar etiqueta class_name:
-        TACInstruction classLabel = new TACInstruction(TACInstruction.OpType.LABEL);
+        TACInstruction classLabel = new TACInstruction(TACInstruction.OpType.LABEL_CLASS);
         classLabel.setLabel(className);
         generator.addInstruction(classLabel);
 

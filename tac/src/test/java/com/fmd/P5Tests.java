@@ -26,10 +26,10 @@ public class P5Tests {
         }
         """;
         List<String> expected = Arrays.asList(
-                "Animal:",
+                "Class Animal:",
                 "t1 = \"doggy\"",
                 "name = t1",
-                "speak:",
+                "Function speak:",
                 "t1 = name",
                 "call print(t1)",
                 "end speak",
@@ -49,10 +49,10 @@ public class P5Tests {
         }
         """;
         List<String> expected = Arrays.asList(
-                "Counter:",
+                "Class Counter:",
                 "t1 = 0",
                 "value = t1",
-                "inc:",
+                "Function inc:",
                 "t1 = this.value",
                 "t2 = 1",
                 "t3 = t1 + t2",
