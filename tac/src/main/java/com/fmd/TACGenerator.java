@@ -126,11 +126,40 @@ public class TACGenerator {
     /**
      * Mantiene el control del offset en memoria
      */
-    public int allocateLocal(int size) {
-        int assignedOffset = currentOffset; // inicio del bloque
-        currentOffset += size;              // avanzar para el siguiente
-        return assignedOffset;              // devolver el inicio real
+    /**
+     * Alinea un entero al siguiente múltiplo de 4
+     */
+    private int align4(int n) {
+        return (n + 3) & ~3; // equivalente a ((n + 3) / 4) * 4
     }
+
+    /**
+     * Mantiene el control del offset en memoria
+     * Ahora garantiza que los offsets devueltos y el avance de currentOffset
+     * sean múltiplos de 4 cuando sea necesario.
+     *
+     * @param size tamaño en bytes requerido (por ejemplo typeSize(tipo))
+     * @return offset asignado (múltiplo de 4)
+     */
+    public int allocateLocal(int size) {
+        // normalizar tamaño mínimo
+        if (size <= 0) size = 4;
+
+        // Primer: alinear currentOffset para que la variable comience en un múltiplo de 4
+        currentOffset = align4(currentOffset);
+
+        // Asignamos el offset actual como inicio
+        int assignedOffset = currentOffset;
+
+        // Incrementar currentOffset. Reservamos exactamente 'size' bytes,
+        // pero también avanzamos currentOffset hasta el siguiente múltiplo de 4
+        // para mantener la alineación de futuras variables.
+        currentOffset += size;
+        currentOffset = align4(currentOffset);
+
+        return assignedOffset;
+    }
+
 
 
     // PRIORIDAD 2: MANEJO DE LOOPS (break/continue)
