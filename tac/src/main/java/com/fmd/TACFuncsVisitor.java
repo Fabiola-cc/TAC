@@ -42,9 +42,10 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
         generator.setCurrentScopeLine(thisScopeLine);
 
         if (paramCount > 0) {
-            for (CompiscriptParser.ParameterContext param : ctx.parameters().parameter()) {
-                Symbol paramSym = generator.getSymbol(param.Identifier().getText());
-                paramSym.setOffset(generator.allocateLocal(generator.typeSize(paramSym.getType())));
+            for (Symbol paramSym : funcSym.getParams()) {
+                int updateOffset = generator.allocateLocal(generator.typeSize(paramSym.getType()));
+                paramSym.setOffset(updateOffset);
+                generator.getSymbol(paramSym.getName()).setOffset(updateOffset);
             }
         }
 
@@ -60,10 +61,20 @@ public class TACFuncsVisitor extends CompiscriptBaseVisitor<Void>{
         int varSize = 0;
         Map<String, Symbol> members = generator.getSymbolTable(thisScopeLine);
         funcSym.setMembers(members); // actualizar miembros de funcion
-        for (Symbol member : members.values()) {
+        for (Symbol member : members.values())
             varSize += member.getOffset();
-        }
+
+        for (Symbol param : funcSym.getParams())
+            varSize += param.getOffset();
+
         funcSym.setLocalVarSize(varSize);
+
+        if (funcSym.getEnclosingClassName() == null) {
+            Symbol classSym = generator.getSymbol(funcSym.getEnclosingClassName());
+            if (classSym != null) {
+                classSym.getMembers().put(funcSym.getName(), funcSym);
+            }
+        }
 
         // etiqueta de fin
         TACInstruction funcEndInstruction = new TACInstruction(TACInstruction.OpType.END);

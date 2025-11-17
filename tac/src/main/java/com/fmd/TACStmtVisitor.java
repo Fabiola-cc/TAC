@@ -5,6 +5,7 @@ import com.fmd.CompiscriptBaseVisitor;
 import com.fmd.modules.Symbol;
 import com.fmd.modules.TACInstruction;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.el.lang.ELSupport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,6 +66,13 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         varSym.setTacAddress(varName);
         varSym.setSize(generator.typeSize(varSym.getType()));
         varSym.setOffset(generator.allocateLocal(varSym.getSize()));
+
+        if (varSym.getEnclosingClassName() == null) {
+            Symbol classSym = generator.getSymbol(varSym.getEnclosingClassName());
+            if (classSym != null) {
+                classSym.getMembers().put(varName, varSym);
+            }
+        }
 
         // Generar instrucciones TAC si tiene inicializador
         if (ctx.initializer() != null) {
@@ -494,6 +502,13 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
         varSym.setSize(generator.typeSize(varSym.getType())); // ej: 4 para int, 8 para string
         varSym.setOffset(generator.allocateLocal(varSym.getSize()));
 
+        if (varSym.getEnclosingClassName() == null) {
+            Symbol classSym = generator.getSymbol(varSym.getEnclosingClassName());
+            if (classSym != null) {
+                classSym.getMembers().put(varName, varSym);
+            }
+        }
+
         // Evaluar la expresión (llamar a exprVisitor)
         String value = exprVisitor.visit(ctx.expression());
 
@@ -910,6 +925,14 @@ public class TACStmtVisitor extends CompiscriptBaseVisitor<Void> {
                 visit(member.constantDeclaration());
             }
         }
+
+        // Guardar tamaño total de la clase
+        int varSize = 0;
+        for (Symbol member : classSym.getMembers().values()) {
+            if (member.getKind() != Symbol.Kind.FUNCTION)
+                varSize += member.getOffset();
+        }
+        classSym.setLocalVarSize(varSize);
 
         // etiqueta de fin
         TACInstruction classEndInstruction = new TACInstruction(TACInstruction.OpType.END_CLASS);
